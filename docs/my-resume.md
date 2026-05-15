@@ -14,7 +14,7 @@ Languages: English (C1), Portuguese
 
 Senior Frontend Engineer with 13+ years of experience delivering product-focused web applications across frontend architecture, UX workflows, and systems-aware engineering.
 
-Specialises in React, TypeScript, and frontend product work with a strong focus on reliability, maintainability, testing, and developer experience. Experienced in building scalable user-facing systems, improving engineering workflows, and collaborating closely with product, design, and backend teams.
+Specialises in React, TypeScript, and frontend product engineering with a strong focus on reliability, maintainability, testing, and developer experience. Experienced in building scalable user-facing systems, improving engineering workflows, and collaborating closely with product, design, and backend teams.
 
 Strong background in onboarding improvements, process automation, frontend systems coordination, and engineering enablement across complex product environments. Known for calm collaborative leadership, high ownership, and pragmatic problem-solving.
 
@@ -24,7 +24,7 @@ Strong background in onboarding improvements, process automation, frontend syste
 
 ## **Frontend**
 
-React, TypeScript, JavaScript (ES6+), Next.js, HTML5, CSS3, Sass, SwiftUI
+React, TypeScript, JavaScript (ES6+), Next.js, HTML5, CSS3, Sass
 
 ## **Product Engineering**
 
@@ -32,15 +32,15 @@ Frontend Architecture, State Management, API Integration, UX Workflows, Accessib
 
 ## **Testing & Reliability**
 
-Jest, React Testing Library, Cypress, Playwright, WebDriverIO, CI/CD, Error Handling, Frontend Reliability, Observability
+Jest, React Testing Library, Cypress, Playwright, WebDriverIO, CI/CD, Observability
 
 ## **Workflow & DX**
 
-GitHub Actions, Jenkins, Azure DevOps, Nx, Webpack, Developer Experience (DX), Workflow Automation
+GitHub Actions, Jenkins, Azure DevOps, Nx, Webpack, Developer Experience (DX), Process Automation
 
 ## **Supporting Technologies**
 
-Node.js, REST APIs, Docker, AWS
+Node.js, REST APIs, Docker, AWS, Firebase
 
 ---
 
@@ -70,7 +70,7 @@ Tech: React, TypeScript, MobX, OpenLayers, Node.js, Azure DevOps, C#, REST APIs
 
 Led frontend delivery and workflow improvements for cross-functional product initiatives, collaborating with architects, backend teams, and frontend engineers to improve delivery quality and release reliability across multiple projects.
 
-- Improved deployment reliability and feedback cycles by introducing Pull Request automation, static analysis, and CI quality gates using GitHub Actions and SonarQube.
+- Improved deployment reliability and feedback cycles by introducing Pull Request automation, static analysis, and CI quality gates across 29 frontend repositories using GitHub Actions and SonarQube.
 - Coordinated cross-functional frontend initiatives involving React, Svelte, and shared platform tooling across multiple teams and delivery streams.
 - Improved onboarding and engineering consistency through code reviews, dependency mapping, workflow documentation, and collaborative technical guidance for frontend developers.
 - Contributed to platform and tooling discussions, roadmap planning, and delivery coordination using UML and C4 modelling approaches.
@@ -125,7 +125,7 @@ Tech: JavaScript, HTML, CSS, Sass, ActionScript, Moodle LMS, AWS EC2, Linux
 
 ## **Alfred (iOS Product Engineering Project) | 2025 – Present**
 
-Modern SwiftUI-based product project focused on onboarding, recommendations, async state management, and maintainable implementation.
+Modern SwiftUI-based product project focused on onboarding, recommendations, async state management, and maintainable frontend systems.
 
 - Built product flows covering onboarding, recommendation handling, notifications, async refresh logic, and session-aware navigation.
 - Used structured AI-assisted workflows with review and verification practices to support maintainable implementation and faster iteration.
