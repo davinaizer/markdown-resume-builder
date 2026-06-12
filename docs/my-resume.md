@@ -1,4 +1,4 @@
-# **Davi Naizer**
+# **Davi Naizer Santos**
 
 Senior Frontend Engineer
 Product Engineering | Reliability & Developer Experience
@@ -54,13 +54,13 @@ Structured sabbatical focused on technical modernization, sustainable work pract
 
 ## **Senior Frontend Software Engineer | The Signal Group | London, UK | 12/2023 – 10/2024**
 
-Worked on the Signal Ocean platform, a data-intensive maritime analytics platform supporting real-time operational decision-making workflows, complex map-based experiences, and large-scale data visualisation.
+Worked on the Signal Ocean platform, a maritime intelligence product used by charterers, brokers, operators, and analysts to monitor vessel activity, manage operational workflows, and make data-driven commercial decisions using large-scale shipping and market data.
 
-- Shipped and maintained frontend features for complex dashboard and map-based analytics workflows using React, TypeScript, and OpenLayers.
-- Collaborated with backend engineers on API design and implementation for dynamic vessel-list template generation, enabling self-service workflow configuration within the platform.
-- Delivered self-service workflow capabilities that reduced reliance on manual template configuration and improved usability for operational users managing vessel-tracking workflows.
-- Owned frontend implementation across API integration, shared state management, and map-based analytics experiences in a data-rich operational product.
-- Contributed to maintainable delivery practices within a cross-functional engineering environment using TypeScript, MobX, and Azure DevOps.
+- Shipped and maintained frontend functionality for vessel-monitoring, analytics, and operational workflow experiences combining large-scale maritime datasets, interactive maps, and configurable user workspaces.
+- Collaborated with backend engineers on metadata-driven vessel-list configuration workflows, enabling reusable templates and self-service customization across operational dashboards.
+- Delivered self-service configuration capabilities that enabled users to create and manage vessel-list templates without manual platform intervention, improving workflow flexibility and usability.
+- Owned frontend implementation for vessel-list workflows spanning API integration, shared state management, and map-driven operational experiences within a maritime analytics platform.
+- Contributed to maintainable delivery practices within a cross-functional engineering environment while working in a complex domain requiring deep understanding of vessel data, operational workflows, and maritime market concepts.
 
 Tech: React, TypeScript, MobX, OpenLayers, Node.js, Azure DevOps, C#, REST APIs
 
