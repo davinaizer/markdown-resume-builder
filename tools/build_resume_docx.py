@@ -4,6 +4,8 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 
+import frontmatter
+from frontmatter.default_handlers import YAMLHandler
 from docx import Document
 from docx.enum.section import WD_SECTION
 from docx.enum.style import WD_STYLE_TYPE
@@ -23,7 +25,7 @@ class ResumeMeta:
     name: str
     title: str
     tagline: str
-    contact: str
+    contact_lines: list[str]
 
 
 @dataclass
@@ -110,39 +112,40 @@ def hex_color(value: str) -> RGBColor:
     return RGBColor(int(value[0:2], 16), int(value[2:4], 16), int(value[4:6], 16))
 
 
+def _require_string(metadata: dict, key: str) -> str:
+    value = metadata.get(key)
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Front matter field '{key}' is required and must be a non-empty string")
+    return clean_md_text(value)
+
+
+def _require_string_list(metadata: dict, key: str) -> list[str]:
+    value = metadata.get(key)
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"Front matter field '{key}' is required and must be a non-empty list of strings")
+    cleaned: list[str] = []
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError(f"Front matter field '{key}' must contain only non-empty strings")
+        cleaned.append(item.strip())
+    return cleaned
+
+
 def parse_resume_markdown(path: Path) -> ResumeContent:
-    lines = path.read_text(encoding="utf-8").splitlines()
+    text = path.read_text(encoding="utf-8")
+    handler = YAMLHandler()
+    if not handler.detect(text):
+        raise ValueError("Resume markdown must start with YAML front matter")
+
+    post = frontmatter.loads(text, handler=handler)
+    metadata = post.metadata
+    name = _require_string(metadata, "name")
+    title = _require_string(metadata, "title")
+    tagline = _require_string(metadata, "tagline")
+    contact_lines = _require_string_list(metadata, "contact_lines")
+
+    lines = post.content.splitlines()
     i = 0
-
-    while i < len(lines) and not lines[i].strip():
-        i += 1
-    if i >= len(lines) or not is_h1(lines[i]):
-        raise ValueError("Resume markdown must start with a top-level name heading")
-    name = clean_md_text(lines[i])
-    i += 1
-
-    title, i = next_content_line(lines, i)
-    if title is None:
-        raise ValueError("Missing title line after name")
-    title = clean_md_text(title)
-    i += 1
-
-    tagline, i = next_content_line(lines, i)
-    if tagline is None:
-        raise ValueError("Missing tagline line after title")
-    tagline = clean_md_text(tagline)
-    i += 1
-
-    contact_lines: list[str] = []
-    while i < len(lines):
-        line = lines[i].strip()
-        if is_rule(line):
-            i += 1
-            break
-        if line:
-            contact_lines.append(clean_md_text(line))
-        i += 1
-    contact = " | ".join(contact_lines)
 
     summary: list[str] = []
     skills: list[SkillLine] = []
@@ -291,7 +294,7 @@ def parse_resume_markdown(path: Path) -> ResumeContent:
         raise ValueError("Selected Project section was not parsed")
 
     return ResumeContent(
-        meta=ResumeMeta(name=name, title=title, tagline=tagline, contact=contact),
+        meta=ResumeMeta(name=name, title=title, tagline=tagline, contact_lines=contact_lines),
         summary=summary,
         skills=skills,
         experience=experience,
@@ -464,12 +467,21 @@ def add_body_paragraph(document: Document, text: str, theme: ResumeTheme = DEFAU
     return paragraph
 
 
-def add_contact_line(document: Document, text: str, theme: ResumeTheme = DEFAULT_THEME):
+def add_contact_line(document: Document, line: str, theme: ResumeTheme = DEFAULT_THEME, *, is_last: bool = False):
     paragraph = document.add_paragraph(style="Normal")
-    run = paragraph.add_run(text)
+    run = paragraph.add_run(line)
     set_font(run, theme, size=theme.contact_size, color=hex_color(theme.grey))
-    set_paragraph_spacing(paragraph, before=0, after=theme.contact_after, line_spacing=theme.single_line_spacing)
-    return paragraph
+    set_paragraph_spacing(
+        paragraph,
+        before=0,
+        after=theme.contact_after if is_last else 0,
+        line_spacing=theme.single_line_spacing,
+    )
+
+
+def add_contact_block(document: Document, lines: list[str], theme: ResumeTheme = DEFAULT_THEME) -> None:
+    for idx, line in enumerate(lines):
+        add_contact_line(document, line, theme, is_last=idx == len(lines) - 1)
 
 
 def add_title_block(document: Document, meta: ResumeMeta, theme: ResumeTheme = DEFAULT_THEME) -> None:
@@ -493,7 +505,7 @@ def add_title_block(document: Document, meta: ResumeMeta, theme: ResumeTheme = D
     set_font(r, theme, size=theme.tagline_size, color=hex_color(theme.grey))
     set_paragraph_spacing(p, before=0, after=theme.tagline_after, line_spacing=theme.single_line_spacing)
 
-    add_contact_line(document, meta.contact, theme)
+    add_contact_block(document, meta.contact_lines, theme)
 
 
 def add_skill_line(document: Document, label: str, text: str, theme: ResumeTheme = DEFAULT_THEME) -> None:

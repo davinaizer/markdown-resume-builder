@@ -1,12 +1,17 @@
 # Markdown Resume Builder
 
-This project builds a polished resume DOCX from a Markdown source file.
+This project builds a polished resume DOCX from a Markdown source file with YAML front matter.
 
 The current workflow is:
 
 - edit [docs/my-resume.md](docs/my-resume.md)
 - run the generator script with `uv`
 - open or upload the resulting [docs/my-resume.docx](docs/my-resume.docx) in Google Docs
+
+The source file uses:
+
+- YAML front matter for metadata and contact lines
+- Markdown body content for the resume sections
 
 The script preserves the resume's current structure and styling, including:
 
@@ -18,6 +23,13 @@ The script preserves the resume's current structure and styling, including:
 - education
 
 Styling is centralized in [tools/resume_theme.py](tools/resume_theme.py). Update that file to adjust the font family, colors, font sizes, spacing, and page layout values used by the generator.
+
+The front matter currently expects:
+
+- `name`
+- `title`
+- `tagline`
+- `contact_lines`
 
 ## Usage
 

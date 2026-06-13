@@ -1,13 +1,11 @@
-# **Davi Naizer Santos**
-
-Senior Frontend Engineer
-Product Engineering | Reliability & Developer Experience
-
-Hove, United Kingdom
-davi.naizer@gmail.com
-LinkedIn: linkedin.com/in/davi-naizer
-Languages: English (C1), Portuguese
-
+---
+name: Davi Naizer Santos
+title: Senior Frontend Engineer
+tagline: Product Engineering | Reliability & Developer Experience
+contact_lines:
+  - Hove, United Kingdom
+  - davi.naizer@gmail.com | linkedin.com/in/davi-naizer
+  - English (C1), Portuguese
 ---
 
 # **LinkedIn About**
