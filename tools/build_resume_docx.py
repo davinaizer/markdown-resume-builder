@@ -12,13 +12,10 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
+from tools.resume_theme import DEFAULT_THEME, ResumeTheme
+
 
 OUT_PATH = Path("docs/my-resume.docx")
-FONT = "IBM Plex Sans"
-INK = RGBColor(0x10, 0x24, 0x3D)
-BLUE = RGBColor(0x1F, 0x3A, 0x5F)
-GREY = RGBColor(0x4F, 0x55, 0x63)
-LIGHT_GREY = "BFC6D1"
 
 
 @dataclass
@@ -104,6 +101,13 @@ def next_content_line(lines: list[str], start: int) -> tuple[str | None, int]:
             return line, i
         i += 1
     return None, len(lines)
+
+
+def hex_color(value: str) -> RGBColor:
+    value = value.strip().lstrip("#")
+    if len(value) != 6:
+        raise ValueError(f"Expected 6-digit hex color, got {value!r}")
+    return RGBColor(int(value[0:2], 16), int(value[2:4], 16), int(value[4:6], 16))
 
 
 def parse_resume_markdown(path: Path) -> ResumeContent:
@@ -296,8 +300,10 @@ def parse_resume_markdown(path: Path) -> ResumeContent:
     )
 
 
-def set_font(run, *, name: str = FONT, size: float | None = None, bold: bool = False,
-             italic: bool = False, color: RGBColor | None = None) -> None:
+def set_font(run, theme: ResumeTheme = DEFAULT_THEME, *, name: str | None = None,
+             size: float | None = None, bold: bool = False, italic: bool = False,
+             color: RGBColor | None = None) -> None:
+    name = name or theme.font_family
     run.font.name = name
     run._element.rPr.rFonts.set(qn("w:ascii"), name)
     run._element.rPr.rFonts.set(qn("w:hAnsi"), name)
@@ -309,25 +315,28 @@ def set_font(run, *, name: str = FONT, size: float | None = None, bold: bool = F
         run.font.color.rgb = color
 
 
-def set_style_font(style, *, name: str = FONT, size: float = 11, bold: bool = False,
-                   color: RGBColor = RGBColor(0, 0, 0), italic: bool = False) -> None:
+def set_style_font(style, theme: ResumeTheme = DEFAULT_THEME, *, name: str | None = None,
+                   size: float = 11, bold: bool = False,
+                   color: RGBColor | None = None, italic: bool = False) -> None:
+    name = name or theme.font_family
     style.font.name = name
     style._element.rPr.rFonts.set(qn("w:ascii"), name)
     style._element.rPr.rFonts.set(qn("w:hAnsi"), name)
     style.font.size = Pt(size)
     style.font.bold = bold
     style.font.italic = italic
-    style.font.color.rgb = color
+    if color is not None:
+        style.font.color.rgb = color
 
 
-def configure_paragraph_style(style, *, size: float, bold: bool = False,
-                              color: RGBColor = RGBColor(0, 0, 0),
+def configure_paragraph_style(style, theme: ResumeTheme = DEFAULT_THEME, *, size: float,
+                              bold: bool = False, color: RGBColor | None = None,
                               italic: bool = False, before: float = 0,
                               after: float = 0, line_spacing: float = 1.2,
                               left_indent: Inches | None = None,
                               first_line_indent: Inches | None = None,
                               alignment: WD_ALIGN_PARAGRAPH | None = None) -> None:
-    set_style_font(style, size=size, bold=bold, color=color, italic=italic)
+    set_style_font(style, theme, size=size, bold=bold, color=color, italic=italic)
     style.paragraph_format.space_before = Pt(before)
     style.paragraph_format.space_after = Pt(after)
     style.paragraph_format.line_spacing_rule = WD_LINE_SPACING.MULTIPLE
@@ -361,7 +370,7 @@ def set_keep_lines(paragraph) -> None:
     ppr.append(keep)
 
 
-def add_bottom_border(paragraph, color: str = LIGHT_GREY, size: str = "8") -> None:
+def add_bottom_border(paragraph, color: str = DEFAULT_THEME.light_grey, size: str = DEFAULT_THEME.section_border_size) -> None:
     ppr = paragraph._p.get_or_add_pPr()
     p_bdr = ppr.find(qn("w:pBdr"))
     if p_bdr is None:
@@ -435,71 +444,74 @@ def set_cell_margins(cell, *, top=80, start=80, bottom=80, end=80) -> None:
         node.set(qn("w:type"), "dxa")
 
 
-def add_section_heading(document: Document, text: str):
+def add_section_heading(document: Document, text: str, theme: ResumeTheme = DEFAULT_THEME):
     paragraph = document.add_paragraph(style="Heading 1")
     run = paragraph.add_run(text.upper())
-    set_font(run, size=12.5, bold=True, color=BLUE)
-    set_paragraph_spacing(paragraph, before=12, after=5, line_spacing=1.0)
+    set_font(run, theme, size=theme.section_heading_size, bold=True, color=hex_color(theme.blue))
+    set_paragraph_spacing(paragraph, before=theme.section_before, after=theme.section_after, line_spacing=theme.single_line_spacing)
     set_keep_with_next(paragraph)
-    add_bottom_border(paragraph)
+    add_bottom_border(paragraph, color=theme.light_grey, size=theme.section_border_size)
     return paragraph
 
 
-def add_body_paragraph(document: Document, text: str, *, style_name: str = "Normal",
-                       before: float = 0, after: float = 3, color: RGBColor = RGBColor(0, 0, 0)):
+def add_body_paragraph(document: Document, text: str, theme: ResumeTheme = DEFAULT_THEME,
+                       *, style_name: str = "Normal", before: float = 0, after: float | None = None,
+                       color: RGBColor | None = None):
     paragraph = document.add_paragraph(style=style_name)
     run = paragraph.add_run(text)
-    set_font(run, size=10.5, color=color)
-    set_paragraph_spacing(paragraph, before=before, after=after, line_spacing=1.18)
+    set_font(run, theme, size=theme.body_size, color=color or hex_color(theme.primary_text_color))
+    set_paragraph_spacing(paragraph, before=before, after=theme.body_after if after is None else after, line_spacing=theme.body_line_spacing)
     return paragraph
 
 
-def add_contact_line(document: Document, text: str):
+def add_contact_line(document: Document, text: str, theme: ResumeTheme = DEFAULT_THEME):
     paragraph = document.add_paragraph(style="Normal")
     run = paragraph.add_run(text)
-    set_font(run, size=10.0, color=GREY)
-    set_paragraph_spacing(paragraph, before=0, after=7, line_spacing=1.0)
+    set_font(run, theme, size=theme.contact_size, color=hex_color(theme.grey))
+    set_paragraph_spacing(paragraph, before=0, after=theme.contact_after, line_spacing=theme.single_line_spacing)
     return paragraph
 
 
-def add_title_block(document: Document, meta: ResumeMeta) -> None:
+def add_title_block(document: Document, meta: ResumeMeta, theme: ResumeTheme = DEFAULT_THEME) -> None:
     p = document.add_paragraph(style="Title")
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     r = p.add_run(meta.name)
-    set_font(r, size=23, bold=True, color=INK)
-    set_paragraph_spacing(p, before=0, after=2, line_spacing=1.0)
+    set_font(r, theme, size=theme.title_size, bold=True, color=hex_color(theme.ink))
+    set_paragraph_spacing(p, before=0, after=theme.title_after, line_spacing=theme.single_line_spacing)
     set_keep_with_next(p)
 
     p = document.add_paragraph(style="Subtitle")
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     r = p.add_run(meta.title)
-    set_font(r, size=13.5, bold=True, color=BLUE)
-    set_paragraph_spacing(p, before=0, after=0, line_spacing=1.0)
+    set_font(r, theme, size=theme.subtitle_size, bold=True, color=hex_color(theme.blue))
+    set_paragraph_spacing(p, before=0, after=theme.subtitle_after, line_spacing=theme.single_line_spacing)
     set_keep_with_next(p)
 
     p = document.add_paragraph(style="Normal")
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     r = p.add_run(meta.tagline)
-    set_font(r, size=11.25, color=GREY)
-    set_paragraph_spacing(p, before=0, after=8, line_spacing=1.0)
+    set_font(r, theme, size=theme.tagline_size, color=hex_color(theme.grey))
+    set_paragraph_spacing(p, before=0, after=theme.tagline_after, line_spacing=theme.single_line_spacing)
 
-    add_contact_line(document, meta.contact)
+    add_contact_line(document, meta.contact, theme)
 
 
-def add_skill_line(document: Document, label: str, text: str) -> None:
+def add_skill_line(document: Document, label: str, text: str, theme: ResumeTheme = DEFAULT_THEME) -> None:
     p = document.add_paragraph(style="Heading 3")
     r1 = p.add_run(label)
-    set_font(r1, size=10.5, bold=True, color=BLUE)
+    set_font(r1, theme, size=theme.skill_label_size, bold=True, color=hex_color(theme.blue))
     r2 = p.add_run(f": {text}")
-    set_font(r2, size=10.5, color=RGBColor(0, 0, 0))
-    set_paragraph_spacing(p, before=0, after=2, line_spacing=1.12)
+    set_font(r2, theme, size=theme.skill_label_size, color=hex_color(theme.primary_text_color))
+    set_paragraph_spacing(p, before=0, after=theme.skill_after, line_spacing=theme.compact_line_spacing)
 
 
 def add_role_entry(document: Document, heading_left: str, date_right: str, description: str,
-                   bullets: list[str], tech: str, left_width: Inches = Inches(5.95),
-                   right_width: Inches = Inches(1.45)) -> None:
+                   bullets: list[str], tech: str, theme: ResumeTheme = DEFAULT_THEME) -> None:
     table = document.add_table(rows=1, cols=2)
-    set_table_fixed_width(table, [left_width, right_width])
+    set_table_fixed_width(
+        table,
+        [Inches(theme.role_table_left_width), Inches(theme.role_table_right_width)],
+    )
     remove_table_borders(table)
 
     left, right = table.rows[0].cells
@@ -513,7 +525,7 @@ def add_role_entry(document: Document, heading_left: str, date_right: str, descr
     p_left.paragraph_format.space_after = Pt(0)
     p_left.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
     r_left = p_left.add_run(heading_left)
-    set_font(r_left, size=10.5, bold=True, color=RGBColor(0, 0, 0))
+    set_font(r_left, theme, size=theme.role_heading_size, bold=True, color=hex_color(theme.primary_text_color))
 
     p_right = right.paragraphs[0]
     p_right.style = document.styles["Normal"]
@@ -522,32 +534,41 @@ def add_role_entry(document: Document, heading_left: str, date_right: str, descr
     p_right.paragraph_format.space_after = Pt(0)
     p_right.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
     r_right = p_right.add_run(date_right)
-    set_font(r_right, size=10.5, color=RGBColor(0, 0, 0))
+    set_font(r_right, theme, size=theme.date_size, color=hex_color(theme.primary_text_color))
 
     desc = document.add_paragraph(style="Normal")
     r = desc.add_run(description)
-    set_font(r, size=10.5, color=RGBColor(0, 0, 0))
-    tail_after = 7 if not bullets and not tech.strip() else 3
-    set_paragraph_spacing(desc, before=2, after=tail_after, line_spacing=1.15)
+    set_font(r, theme, size=theme.body_size, color=hex_color(theme.primary_text_color))
+    tail_after = theme.role_tech_after if not bullets and not tech.strip() else theme.role_description_after
+    set_paragraph_spacing(
+        desc,
+        before=theme.role_description_before,
+        after=tail_after,
+        line_spacing=theme.role_description_line_spacing,
+    )
 
     for bullet in bullets:
         p = document.add_paragraph(style="List Bullet")
         r = p.add_run(bullet)
-        set_font(r, size=10.5, color=RGBColor(0, 0, 0))
-        set_paragraph_spacing(p, before=0, after=0, line_spacing=1.12)
+        set_font(r, theme, size=theme.body_size, color=hex_color(theme.primary_text_color))
+        set_paragraph_spacing(p, before=0, after=theme.role_bullet_after, line_spacing=theme.compact_line_spacing)
 
     if tech.strip():
         tech_p = document.add_paragraph(style="Normal")
         t1 = tech_p.add_run("Tech:")
-        set_font(t1, size=10.5, italic=True, color=GREY)
+        set_font(t1, theme, size=theme.tech_label_size, italic=True, color=hex_color(theme.grey))
         t2 = tech_p.add_run(f" {tech}")
-        set_font(t2, size=10.5, color=GREY)
-        set_paragraph_spacing(tech_p, before=1, after=7, line_spacing=1.0)
+        set_font(t2, theme, size=theme.tech_value_size, color=hex_color(theme.grey))
+        set_paragraph_spacing(tech_p, before=theme.role_tech_before, after=theme.role_tech_after, line_spacing=theme.single_line_spacing)
 
 
-def add_education_entry(document: Document, heading_left: str, date_right: str, school: str) -> None:
+def add_education_entry(document: Document, heading_left: str, date_right: str, school: str,
+                        theme: ResumeTheme = DEFAULT_THEME) -> None:
     table = document.add_table(rows=1, cols=2)
-    set_table_fixed_width(table, [Inches(5.95), Inches(1.45)])
+    set_table_fixed_width(
+        table,
+        [Inches(theme.role_table_left_width), Inches(theme.role_table_right_width)],
+    )
     remove_table_borders(table)
     left, right = table.rows[0].cells
     set_cell_margins(left, top=0, start=0, bottom=0, end=0)
@@ -556,43 +577,43 @@ def add_education_entry(document: Document, heading_left: str, date_right: str, 
     p_left = left.paragraphs[0]
     p_left.alignment = WD_ALIGN_PARAGRAPH.LEFT
     r_left = p_left.add_run(heading_left)
-    set_font(r_left, size=10.5, bold=True, color=RGBColor(0, 0, 0))
+    set_font(r_left, theme, size=theme.role_heading_size, bold=True, color=hex_color(theme.primary_text_color))
     p_left.paragraph_format.space_after = Pt(0)
     p_left.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
 
     p_right = right.paragraphs[0]
     p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     r_right = p_right.add_run(date_right)
-    set_font(r_right, size=10.5, color=RGBColor(0, 0, 0))
+    set_font(r_right, theme, size=theme.date_size, color=hex_color(theme.primary_text_color))
     p_right.paragraph_format.space_after = Pt(0)
     p_right.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
 
     p_school = document.add_paragraph(style="Normal")
     r_school = p_school.add_run(school)
-    set_font(r_school, size=10.5, color=RGBColor(0, 0, 0))
-    set_paragraph_spacing(p_school, before=2, after=8, line_spacing=1.12)
+    set_font(r_school, theme, size=theme.body_size, color=hex_color(theme.primary_text_color))
+    set_paragraph_spacing(p_school, before=2, after=theme.education_school_after, line_spacing=theme.compact_line_spacing)
 
 
 def add_experience_entry(document: Document, heading_left: str, date_right: str, description: str,
-                         bullets: list[str], tech: str) -> None:
-    add_role_entry(document, heading_left, date_right, description, bullets, tech)
+                         bullets: list[str], tech: str, theme: ResumeTheme = DEFAULT_THEME) -> None:
+    add_role_entry(document, heading_left, date_right, description, bullets, tech, theme)
 
 
-def build_doc_from_markdown(md_path: Path) -> Document:
+def build_doc_from_markdown(md_path: Path, theme: ResumeTheme = DEFAULT_THEME) -> Document:
     content = parse_resume_markdown(md_path)
     doc = Document()
     clear_document(doc)
 
     section = doc.sections[0]
-    section.page_width = Inches(8.5)
-    section.page_height = Inches(11)
-    margin = Inches(0.55)
+    section.page_width = Inches(theme.page_width)
+    section.page_height = Inches(theme.page_height)
+    margin = Inches(theme.margin)
     section.top_margin = margin
     section.bottom_margin = margin
     section.left_margin = margin
     section.right_margin = margin
-    section.header_distance = Inches(0.35)
-    section.footer_distance = Inches(0.35)
+    section.header_distance = Inches(theme.header_distance)
+    section.footer_distance = Inches(theme.footer_distance)
 
     core_props = doc.core_properties
     core_props.title = f"{content.meta.name} Resume"
@@ -600,94 +621,106 @@ def build_doc_from_markdown(md_path: Path) -> Document:
     core_props.author = content.meta.name
 
     normal = doc.styles["Normal"]
-    set_style_font(normal, size=10.5, color=RGBColor(0, 0, 0))
+    set_style_font(normal, theme, size=theme.body_size, color=hex_color(theme.primary_text_color))
     normal.paragraph_format.space_before = Pt(0)
     normal.paragraph_format.space_after = Pt(0)
     normal.paragraph_format.line_spacing_rule = WD_LINE_SPACING.MULTIPLE
-    normal.paragraph_format.line_spacing = 1.18
+    normal.paragraph_format.line_spacing = theme.body_line_spacing
 
     configure_paragraph_style(
         doc.styles["Title"],
-        size=23,
+        theme,
+        size=theme.title_size,
         bold=True,
-        color=INK,
+        color=hex_color(theme.ink),
         before=0,
-        after=2,
-        line_spacing=1.0,
+        after=theme.title_after,
+        line_spacing=theme.single_line_spacing,
         alignment=WD_ALIGN_PARAGRAPH.LEFT,
     )
     configure_paragraph_style(
         doc.styles["Subtitle"],
-        size=13.5,
+        theme,
+        size=theme.subtitle_size,
         bold=True,
-        color=BLUE,
+        color=hex_color(theme.blue),
         before=0,
-        after=0,
-        line_spacing=1.0,
+        after=theme.subtitle_after,
+        line_spacing=theme.single_line_spacing,
         alignment=WD_ALIGN_PARAGRAPH.LEFT,
     )
     configure_paragraph_style(
         doc.styles["Heading 1"],
-        size=12.5,
+        theme,
+        size=theme.section_heading_size,
         bold=True,
-        color=BLUE,
-        before=12,
-        after=5,
-        line_spacing=1.0,
+        color=hex_color(theme.blue),
+        before=theme.section_before,
+        after=theme.section_after,
+        line_spacing=theme.single_line_spacing,
         alignment=WD_ALIGN_PARAGRAPH.LEFT,
     )
     configure_paragraph_style(
         doc.styles["Heading 2"],
-        size=10.5,
+        theme,
+        size=theme.heading2_size,
         bold=True,
-        color=RGBColor(0, 0, 0),
+        color=hex_color(theme.primary_text_color),
         before=0,
-        after=0,
-        line_spacing=1.0,
+        after=theme.heading2_after,
+        line_spacing=theme.heading2_line_spacing,
         alignment=WD_ALIGN_PARAGRAPH.LEFT,
     )
     configure_paragraph_style(
         doc.styles["Heading 3"],
-        size=10.5,
+        theme,
+        size=theme.skill_label_size,
         bold=True,
-        color=BLUE,
+        color=hex_color(theme.blue),
         before=0,
-        after=2,
-        line_spacing=1.12,
+        after=theme.skill_after,
+        line_spacing=theme.compact_line_spacing,
         alignment=WD_ALIGN_PARAGRAPH.LEFT,
     )
     configure_paragraph_style(
         doc.styles["Normal"],
-        size=10.5,
-        color=RGBColor(0, 0, 0),
+        theme,
+        size=theme.body_size,
+        color=hex_color(theme.primary_text_color),
         before=0,
         after=0,
-        line_spacing=1.18,
+        line_spacing=theme.body_line_spacing,
         alignment=WD_ALIGN_PARAGRAPH.LEFT,
     )
     configure_paragraph_style(
         doc.styles["List Bullet"],
-        size=10.5,
-        color=RGBColor(0, 0, 0),
+        theme,
+        size=theme.body_size,
+        color=hex_color(theme.primary_text_color),
         before=0,
         after=0,
-        line_spacing=1.12,
-        left_indent=Inches(0.22),
-        first_line_indent=Inches(-0.18),
+        line_spacing=theme.compact_line_spacing,
+        left_indent=Inches(theme.list_bullet_left_indent),
+        first_line_indent=Inches(theme.list_bullet_first_line_indent),
         alignment=WD_ALIGN_PARAGRAPH.LEFT,
     )
 
-    add_title_block(doc, content.meta)
+    add_title_block(doc, content.meta, theme)
 
-    add_section_heading(doc, "Summary")
+    add_section_heading(doc, "Summary", theme)
     for idx, paragraph in enumerate(content.summary):
-        add_body_paragraph(doc, paragraph, after=2 if idx < len(content.summary) - 1 else 4)
+        add_body_paragraph(
+            doc,
+            paragraph,
+            theme,
+            after=theme.summary_after if idx < len(content.summary) - 1 else theme.summary_last_after,
+        )
 
-    add_section_heading(doc, "Core Skills")
+    add_section_heading(doc, "Core Skills", theme)
     for skill in content.skills:
-        add_skill_line(doc, skill.label, skill.value)
+        add_skill_line(doc, skill.label, skill.value, theme)
 
-    add_section_heading(doc, "Professional Experience")
+    add_section_heading(doc, "Professional Experience", theme)
     for entry in content.experience:
         add_experience_entry(
             doc,
@@ -696,9 +729,10 @@ def build_doc_from_markdown(md_path: Path) -> Document:
             entry.description,
             entry.bullets,
             entry.tech,
+            theme,
         )
 
-    add_section_heading(doc, "Selected Project")
+    add_section_heading(doc, "Selected Project", theme)
     add_experience_entry(
         doc,
         content.selected_project.heading_left,
@@ -706,11 +740,12 @@ def build_doc_from_markdown(md_path: Path) -> Document:
         content.selected_project.description,
         content.selected_project.bullets,
         content.selected_project.tech,
+        theme,
     )
 
-    add_section_heading(doc, "Education")
+    add_section_heading(doc, "Education", theme)
     for item in content.education:
-        add_education_entry(doc, item.heading_left, item.date_right, item.school)
+        add_education_entry(doc, item.heading_left, item.date_right, item.school, theme)
 
     return doc
 
@@ -725,7 +760,7 @@ def main() -> None:
     output_docx = Path(args.output)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    doc = build_doc_from_markdown(input_md)
+    doc = build_doc_from_markdown(input_md, DEFAULT_THEME)
     output_docx.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(output_docx))
     print(f"Wrote {output_docx}")

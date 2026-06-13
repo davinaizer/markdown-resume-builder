@@ -17,6 +17,8 @@ The script preserves the resume's current structure and styling, including:
 - selected project
 - education
 
+Styling is centralized in [tools/resume_theme.py](tools/resume_theme.py). Update that file to adjust the font family, colors, font sizes, spacing, and page layout values used by the generator.
+
 ## Usage
 
 Install dependencies through `uv` if needed:
@@ -42,3 +44,4 @@ uv run build-resume docs/my-resume.md -o /path/to/resume.docx
 - [docs/my-resume.md](docs/my-resume.md): source resume content
 - [docs/my-resume.docx](docs/my-resume.docx): generated Word document
 - [tools/build_resume_docx.py](tools/build_resume_docx.py): Markdown-to-DOCX generator
+- [tools/resume_theme.py](tools/resume_theme.py): default styling/theme values
