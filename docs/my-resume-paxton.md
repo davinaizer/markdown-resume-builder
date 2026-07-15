@@ -126,16 +126,17 @@ Co-developed browser-based e-learning platforms and interactive educational prod
 
 # **Selected Project**
 
-## **Alfred (iOS Product Engineering Project) | 2025 – Present**
+## **Alfred | Mobile & Web Product Engineering Project | 2025 – Present**
 
-End-to-end product engineering project exploring modern application architecture, AI-assisted development workflows, API integration, state management, and maintainable software design using SwiftUI.
+Collaborative product engineering project consisting of iOS and web applications integrated with a separately developed .NET backend. Responsible for the frontend product experience, architecture, and implementation across both client applications.
 
-- Built product flows covering onboarding, recommendation handling, notifications, async refresh logic, and session-aware navigation.
-- Used AI-assisted development workflows to accelerate implementation while maintaining review, testing, and verification standards.
-- Developed testing and verification practices supporting maintainable implementation and collaborative iteration.
-- Built as an end-to-end product engineering exercise covering product flows, API integration, state management, testing practices, and collaborative frontend/backend delivery.
+- Designed and built the iOS application using SwiftUI, repository/use-case layering, protocol-based dependency injection, observable state models, and concurrency-safe services.
+- Delivered product flows covering authentication, onboarding, recommendations, planning, notifications, maps, voice input, session-aware navigation, and realtime updates through SignalR.
+- Built supporting product surfaces including widgets and CarPlay integration, extending the application beyond the primary mobile interface.
+- Developed the React and TypeScript web client with API integration, authentication, realtime updates, forms, calendar workflows, and map-based interfaces.
+- Established testing and verification practices using XCTest, Swift Testing, and structured AI-assisted development workflows while maintaining manual review and architectural control.
 
-**Tech:** SwiftUI, Swift, REST APIs, Firebase, SignalR, XcodeGen, Testing, Workflow Automation
+**Tech:** SwiftUI, Swift, React, TypeScript, REST APIs, SignalR, Firebase, MapKit, WidgetKit, CarPlay, XCTest, Swift Testing
 
 ---
 
