@@ -1,4 +1,5 @@
 ---
+createdAt: 2026-07-14
 name: Davi Naizer Santos
 title: Senior Software Engineer (Frontend)
 tagline: Product Engineering | Frontend Architecture | Developer Experience

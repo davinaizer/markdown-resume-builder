@@ -1,21 +1,21 @@
 ---
-createdAt: 2026-05-15
+createdAt: 2026-07-17
 name: Davi Naizer Santos
-title: Senior Frontend Engineer
+title: Senior Software Engineer (Frontend / Product Engineering)
 tagline: Product Engineering | Reliability & Developer Experience
 contact_lines:
-  - Hove, United Kingdom
+  - Hove, England, United Kingdom
   - davi.naizer@gmail.com | linkedin.com/in/davi-naizer
   - English (C1), Portuguese
 ---
 
 # **Summary**
 
-Senior Frontend Engineer with 13+ years of experience delivering product-focused web applications across React, TypeScript, frontend architecture, and engineering workflow improvement.
+Senior Software Engineer specialising in frontend product engineering with 13+ years of experience delivering product-focused web applications across React, TypeScript, frontend architecture, and engineering workflow improvement.
 
 Experienced in identifying operational friction, improving delivery systems, and building user-facing products in collaboration with product, design, and backend teams. Recent work has included deployment automation across 29 repositories, internal tooling that reduced operational processes from days to minutes, and frontend systems supporting complex operational workflows and decision-making.
 
-Strongest areas include frontend product engineering, developer experience, workflow reliability, onboarding systems, and cross-functional delivery. Particularly interested in understanding user and operational problems, then building maintainable solutions that improve how people work while balancing engineering quality and sustainable delivery.
+Strongest areas include product engineering, frontend architecture, developer experience, workflow reliability, AI-assisted engineering workflows, and cross-functional product delivery. Particularly interested in understanding user problems, collaborating closely with stakeholders, and building maintainable solutions that balance engineering quality, product outcomes, and sustainable delivery.
 
 ---
 
@@ -27,7 +27,7 @@ React, TypeScript, JavaScript (ES6+), Next.js, HTML5, CSS3, Sass
 
 ## **Product Engineering**
 
-Frontend Architecture, State Management, API Integration, UX Workflows, Accessibility, Cross-Functional Delivery
+Product Engineering, Product Discovery, Frontend Architecture, State Management, API Integration, UX Workflows, Accessibility, Cross-Functional Delivery
 
 ## **Testing & Reliability**
 
@@ -47,7 +47,7 @@ Node.js, REST APIs, Docker, AWS, Firebase
 
 ## **Career Break | Independent Product & Technical Development | 11/2024 – Present**
 
-Structured sabbatical focused on technical modernization, sustainable work practices, and exploration of AI-assisted engineering workflows while continuing hands-on development across frontend and mobile technologies.
+Structured sabbatical focused on technical modernisation, AI-assisted engineering workflows, sustainable work practices, and hands-on product development across frontend and mobile technologies.
 
 ---
 
@@ -109,7 +109,7 @@ Tech: React, JavaScript, Redux, Sass, Webpack, Gulp, Jenkins
 
 ## **Co-founder & Frontend Developer | UNBOX Learning Experience | Curitiba, Brazil | 2009 – 2017**
 
-Co-developed browser-based e-learning platforms and interactive educational products for client projects, focusing on frontend development, user experience, and collaborative delivery.
+Co-founded and helped grow an EdTech company specialising in corporate learning solutions, developing browser-based learning platforms and interactive educational products for enterprise clients. Combined frontend engineering, product delivery, and direct client collaboration across the full project lifecycle.
 
 - Built and maintained browser-based learning platforms and interactive educational experiences using JavaScript, HTML, CSS, and ActionScript.
 - Developed frontend interfaces and custom LMS functionality supporting content delivery, interactive learning workflows, and user engagement.
@@ -124,10 +124,10 @@ Tech: JavaScript, HTML, CSS, Sass, ActionScript, Moodle LMS, AWS EC2, Linux
 
 ## **Alfred (iOS Product Engineering Project) | 2025 – Present**
 
-SwiftUI-based product engineering project built to explore modern mobile architecture, AI-assisted development workflows, onboarding experiences, and maintainable application design.
+SwiftUI-based iOS application developed to explore modern mobile architecture, AI-assisted engineering workflows, onboarding experiences, and maintainable application design.
 
 - Built product flows covering onboarding, recommendation handling, notifications, async refresh logic, and session-aware navigation.
-- Used AI-assisted development workflows to accelerate implementation while maintaining review, testing, and verification standards.
+- Used AI-assisted development workflows to prototype, iterate, accelerate implementation, and validate solutions while maintaining review, testing, and verification standards.
 - Developed testing and verification practices supporting maintainable implementation and collaborative iteration.
 - Built as an end-to-end product engineering exercise covering product flows, API integration, state management, testing practices, and collaborative frontend/backend delivery.
 
