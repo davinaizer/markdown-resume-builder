@@ -19,8 +19,13 @@ package = true
 requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[dependency-groups]
+dev = [
+    "ruff>=0.16.0",
+]
+
 [tool.setuptools]
 include-package-data = false
 
 [tool.setuptools.packages.find]
-include = ["resume_builder*", "tools*"]
+include = ["resume_builder*"]

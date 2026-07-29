@@ -2,7 +2,7 @@
 
 ## Goal
 
-Refactor the resume builder into a clear, maintainable Python package and use section-based Markdown sources with editable rendered section titles while preserving legacy single-file Markdown compatibility.
+Maintain a clear Python package that builds resumes from canonical section-based Markdown source directories with editable rendered section titles.
 
 This plan follows the project-structure guidance from:
 - https://docs.python-guide.org/writing/structure/
@@ -15,7 +15,8 @@ This plan follows the project-structure guidance from:
 - The repository root contains `README.md`; governance and handoff documents live under `docs/`; resume sources live under `source/`; generated DOCX files live under ignored `output/`.
 - Editable section titles affect presentation only. Canonical definitions and filenames determine section identity, ordering, and parsing behavior.
 - Missing required section files warn and are skipped. The explicitly optional `selected-project.md` is silently omitted when absent.
-- Existing single-file Markdown sources and compatibility entry points remain supported.
+- Only section-based source directories are supported.
+- Ruff provides the project linting and formatting baseline.
 
 ## Final architecture
 
@@ -45,20 +46,17 @@ markdown-resume-builder/
     renderer.py
     theme.py
   tests/
-  tools/                      # legacy compatibility modules
-  main.py                     # legacy compatibility entry point
 ```
 
 ## Module responsibilities
 
 - `cli.py`: command-line parsing, path resolution, and orchestration.
 - `models.py`: dataclasses for resume metadata and parsed section content.
-- `parser.py`: section-content parsing and legacy single-file Markdown parsing.
+- `parser.py`: section-content parsing.
 - `sections.py`: canonical section definitions, file loading, ordering, and missing-file warnings.
 - `renderer.py`: DOCX generation.
 - `theme.py`: styling and layout constants.
 
-Thin historical entry points and original file-oriented parser and renderer function names remain as compatibility shims. They delegate to the source-oriented package implementation and are intentionally retained to avoid breaking existing callers.
 
 ## Canonical source contract
 
@@ -80,7 +78,7 @@ Missing required files produce path-specific warnings and are skipped without an
 
 ### Phase 1 — Package extraction (complete)
 - Moved generation logic into the `resume_builder` package.
-- Preserved the `build-resume` command and compatibility entry points.
+- Preserved the `build-resume` command.
 
 ### Phase 2 — Resume source split (complete)
 - Migrated the former `docs/resume-source.md` content into metadata and canonical per-section files, now under `source/canon-resume/`.
@@ -88,7 +86,7 @@ Missing required files produce path-specific warnings and are skipped without an
 
 ### Phase 3 — Editable section titles (complete)
 - Added section-file frontmatter titles for rendered headings.
-- Preserved canonical filename-based identity, ordering, parsing, and legacy single-file behavior.
+- Preserved canonical filename-based identity, ordering, and parsing.
 
 ### Phase 4 — Optional sections (complete)
 - Made missing expected section files non-fatal.
@@ -97,15 +95,20 @@ Missing required files produce path-specific warnings and are skipped without an
 
 ### Phase 5 — Cleanup and documentation (complete)
 - Audited code, configuration, tests, examples, and documentation for obsolete monolithic-source and stale layout assumptions.
-- Documented the complete source contract, warning behavior, title semantics, CLI path resolution, legacy compatibility, and generated-output handling in the root `README.md`.
-- Reviewed compatibility wrappers and retained those needed to preserve package and CLI compatibility.
+- Documented the complete source contract, warning behavior, title semantics, CLI path resolution, and generated-output handling in the root `README.md`.
 - Completed the validation recorded in `docs/PROJECT_STATE.md`.
-- Completed an adversarial final review for behavior changes, compatibility regressions, inaccurate documentation, stale paths, and unnecessary cleanup churn.
+- Completed an adversarial final review for behavior changes, inaccurate documentation, stale paths, and unnecessary cleanup churn.
 - Removed generated `output/`, `build/`, and `dist/` artifacts.
+
+### Phase 6 — API simplification and development tooling (complete)
+- Standardized the application on section-based source directories.
+- Removed unsupported entry points, APIs, model defaults, tests, packaging configuration, and documentation.
+- Added Ruff as a development dependency and formatted the Python codebase.
+- Added a regression test enforcing directory-only sources.
 
 ## Maintenance guidance
 
 - Treat `source/` Markdown as the source of truth and `output/` DOCX files as disposable build artifacts.
 - Add or reorder sections by changing the canonical definitions and all affected parsing, rendering, documentation, and tests together; do not use editable frontmatter titles as identifiers.
-- Preserve legacy single-file support unless a future version intentionally introduces and documents a breaking change.
+- Run Ruff and the full test suite before merging changes.
 - Prefer focused changes over broad parser or renderer refactors now that the planned migration is complete.

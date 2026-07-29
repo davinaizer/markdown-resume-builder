@@ -32,15 +32,22 @@ class ResumeSource:
     @property
     def content(self) -> str:
         return "\n\n".join(
-            f"# {section.canonical_title}\n\n{section.content}" for section in self.sections
+            f"# {section.canonical_title}\n\n{section.content}"
+            for section in self.sections
         )
 
 
 SECTION_DEFINITIONS = (
     SectionDefinition("summary", "Summary", "summary.md"),
     SectionDefinition("core_skills", "Core Skills", "core-skills.md"),
-    SectionDefinition("professional_experience", "Professional Experience", "professional-experience.md"),
-    SectionDefinition("selected_project", "Selected Project", "selected-project.md", optional=True),
+    SectionDefinition(
+        "professional_experience",
+        "Professional Experience",
+        "professional-experience.md",
+    ),
+    SectionDefinition(
+        "selected_project", "Selected Project", "selected-project.md", optional=True
+    ),
     SectionDefinition("education", "Education", "education.md"),
 )
 
@@ -66,13 +73,18 @@ def load_resume_directory(path: Path) -> ResumeSource:
         section_path = sections_path / definition.filename
         if not section_path.is_file():
             if not definition.optional:
-                print(f"Warning: resume section file not found; skipping: {section_path}", file=sys.stderr)
+                print(
+                    f"Warning: resume section file not found; skipping: {section_path}",
+                    file=sys.stderr,
+                )
             continue
 
         section = _load_frontmatter_file(section_path)
         title = section.metadata.get("title")
         if not isinstance(title, str) or not title.strip():
-            raise ValueError(f"Front matter field 'title' is required and must be a non-empty string: {section_path}")
+            raise ValueError(
+                f"Front matter field 'title' is required and must be a non-empty string: {section_path}"
+            )
         loaded_sections.append(
             LoadedSection(
                 kind=definition.kind,

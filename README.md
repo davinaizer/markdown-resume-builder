@@ -19,8 +19,6 @@ source/                      # resume sources
 output/                      # generated DOCX files; ignored by Git
 resume_builder/              # Python package
 tests/                       # test suite
-tools/                       # legacy compatibility modules
-main.py                      # legacy compatibility entry point
 ```
 
 Generated documents are build artifacts, not source files. Keep resume content under `source/`; the CLI creates `output/` when needed, and Git ignores it.
@@ -75,28 +73,19 @@ uv run build-resume
 CLI path resolution follows these rules:
 
 - A relative source name that does not already exist resolves under `source/`. For example, `canon-resume` becomes `source/canon-resume`.
-- An existing relative source path is used as provided.
-- An absolute source path is used as provided.
+- An existing relative source directory is used as provided.
+- An absolute source directory is used as provided.
+- Source files are not supported; the input must be a section-based source directory.
 - A relative output path always resolves under `output/`.
 - An absolute output path is used as provided.
 
-## Legacy single-file compatibility
 
-Existing single-file Markdown resume sources remain supported when supplied as an existing file path:
-
-```bash
-uv run build-resume path/to/resume.md -o legacy-resume.docx
-```
-
-A legacy file contains metadata frontmatter followed by canonical level-one Markdown headings such as `# Summary`, `# Core Skills`, `# Professional Experience`, `# Selected Project`, and `# Education`. Those canonical headings determine section identity, parsing, ordering, and visible headings for the legacy format. Per-section editable title frontmatter applies only to section-based directory sources.
-
-The compatibility entry points and original file-oriented parser and renderer function names remain available for existing callers. New code should use the `build-resume` command and source-oriented package APIs.
 
 ## Package structure
 
 - `resume_builder/cli.py`: command-line parsing, path resolution, and orchestration
 - `resume_builder/models.py`: parsed resume data models
-- `resume_builder/parser.py`: section-content and legacy single-file parsing
+- `resume_builder/parser.py`: section-content parsing
 - `resume_builder/sections.py`: canonical section definitions, discovery, loading, ordering, and missing-file warnings
 - `resume_builder/renderer.py`: DOCX generation
 - `resume_builder/theme.py`: document styling and layout
@@ -108,6 +97,15 @@ Run the full test suite:
 ```bash
 uv run python -m unittest discover -s tests
 ```
+
+Run lint and formatting checks:
+
+```bash
+uv run ruff check .
+uv run ruff format --check .
+```
+
+Apply Ruff formatting with `uv run ruff format .`.
 
 Build the distributable package:
 

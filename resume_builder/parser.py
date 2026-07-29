@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import frontmatter
-from frontmatter.default_handlers import YAMLHandler
-
 from resume_builder.models import (
     EducationBlock,
     EntryBlock,
@@ -64,43 +61,38 @@ def next_content_line(lines: list[str], start: int) -> tuple[str | None, int]:
 def _require_string(metadata: dict, key: str) -> str:
     value = metadata.get(key)
     if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"Front matter field '{key}' is required and must be a non-empty string")
+        raise ValueError(
+            f"Front matter field '{key}' is required and must be a non-empty string"
+        )
     return clean_md_text(value)
 
 
 def _require_string_list(metadata: dict, key: str) -> list[str]:
     value = metadata.get(key)
     if not isinstance(value, list) or not value:
-        raise ValueError(f"Front matter field '{key}' is required and must be a non-empty list of strings")
+        raise ValueError(
+            f"Front matter field '{key}' is required and must be a non-empty list of strings"
+        )
     cleaned: list[str] = []
     for item in value:
         if not isinstance(item, str) or not item.strip():
-            raise ValueError(f"Front matter field '{key}' must contain only non-empty strings")
+            raise ValueError(
+                f"Front matter field '{key}' must contain only non-empty strings"
+            )
         cleaned.append(item.strip())
     return cleaned
 
 
 def parse_resume_source(path: Path) -> ResumeContent:
-    if path.is_dir():
-        source = load_resume_directory(path)
-        metadata = source.metadata
-        content = source.content
-        titles_by_kind = {section.kind: section.title for section in source.sections}
-        section_titles = SectionTitles(**titles_by_kind)
-        present_sections = frozenset(titles_by_kind)
-    else:
-        text = path.read_text(encoding="utf-8")
-        handler = YAMLHandler()
-        if not handler.detect(text):
-            raise ValueError("Resume markdown must start with YAML front matter")
+    if not path.is_dir():
+        raise NotADirectoryError(f"Resume source must be an existing directory: {path}")
 
-        post = frontmatter.loads(text, handler=handler)
-        metadata = post.metadata
-        content = post.content
-        section_titles = SectionTitles()
-        present_sections = frozenset(
-            {"summary", "core_skills", "professional_experience", "selected_project", "education"}
-        )
+    source = load_resume_directory(path)
+    metadata = source.metadata
+    content = source.content
+    titles_by_kind = {section.kind: section.title for section in source.sections}
+    section_titles = SectionTitles(**titles_by_kind)
+    present_sections = frozenset(titles_by_kind)
     name = _require_string(metadata, "name")
     title = _require_string(metadata, "title")
     tagline = _require_string(metadata, "tagline")
@@ -245,7 +237,9 @@ def parse_resume_source(path: Path) -> ResumeContent:
                 i += 1
 
     return ResumeContent(
-        meta=ResumeMeta(name=name, title=title, tagline=tagline, contact_lines=contact_lines),
+        meta=ResumeMeta(
+            name=name, title=title, tagline=tagline, contact_lines=contact_lines
+        ),
         section_titles=section_titles,
         present_sections=present_sections,
         summary=summary,
@@ -254,8 +248,3 @@ def parse_resume_source(path: Path) -> ResumeContent:
         selected_project=selected_project,
         education=education,
     )
-
-
-def parse_resume_markdown(path: Path) -> ResumeContent:
-    """Compatibility wrapper for callers using the original file-oriented API."""
-    return parse_resume_source(path)

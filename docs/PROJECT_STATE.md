@@ -6,7 +6,7 @@
 
 ## Current phase
 
-Phase 5 — Cleanup and documentation complete
+Phase 6 — API simplification and development tooling complete
 
 ## Status summary
 
@@ -20,13 +20,13 @@ Phase 5 — Cleanup and documentation complete
 - `selected-project.md` is explicitly optional and is silently omitted when absent.
 - Every present section file requires a non-empty frontmatter `title`; that value controls only the rendered heading.
 - Canonical section definitions and filenames determine section identity, ordering, and parsing behavior. Editable titles do not override them.
-- Legacy single-file Markdown sources remain supported through canonical level-one headings. Original file-oriented parser and renderer names and thin historical entry points remain compatibility shims.
-- References to the obsolete `docs/resume-source.md` path are migration history only, not current source or usage guidance.
+- Resume inputs must be section-based source directories; file inputs raise `NotADirectoryError`.
+- Ruff is installed as a development dependency for linting and formatting.
 - Phase 5 removed four unreachable heading-prefix branches from `resume_builder/parser.py`; `clean_md_text()` had already removed those prefixes, so behavior is unchanged.
 - No resume source content was changed.
-- A final adversarial review found no CLI, parsing, rendering, ordering, omission, title-handling, or legacy-compatibility regressions. It corrected documentation around non-fatal required files, an absent `sections/` directory, retained compatibility paths, and obsolete-path wording.
+- Unsupported source paths, APIs, entry points, model defaults, tests, packaging references, and documentation have been removed.
 
-## Phase 5 validation
+## Final validation
 
 Completed successfully:
 
@@ -34,18 +34,19 @@ Completed successfully:
 - `uv run build-resume` — wrote `output/resume.docx`.
 - `uv run build-resume canon-resume -o resume-test.docx` — wrote `output/resume-test.docx`.
 - `uv build` — built the source distribution and wheel successfully using root `README.md` package metadata.
-- `uv run python -m compileall -q resume_builder tools main.py tests` — passed.
-- Project diagnostics — no errors; parser and active package cleanup are clean.
+- `uv run ruff check .` — passed.
+- `uv run ruff format --check .` — 16 files already formatted.
+- `uv run python -m compileall -q resume_builder tests` — passed.
+- Project diagnostics — no errors or warnings.
 - `git diff --check` — passed.
 - Final stale-reference and documentation-consistency scans — passed.
 
 Generated `output/`, `build/`, and `dist/` artifacts were removed after validation.
 
-## Known issues and tooling limitations
+## Known issues
 
-- Ruff is not declared or installed in the project environment, so `uv run ruff check .` and `uv run ruff format --check .` could not run (`Failed to spawn: ruff`). No formatting dependency was added solely for Phase 5.
-- Editor diagnostics report import-format warnings in the thin historical entry points `main.py` and `tools/build_resume_docx.py`; both compile and remain unchanged for compatibility.
+- None currently known.
 
 ## Recommended next step
 
-Use the completed section-based workflow for resume maintenance. If further engineering work is planned, first decide whether the legacy `tools/`, `main.py`, and file-oriented API shims will remain part of the supported public surface; only then consider a separately versioned compatibility-removal or parser-decomposition change.
+Use the section-based workflow for resume maintenance and run the documented tests and Ruff checks for future changes.

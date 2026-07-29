@@ -8,8 +8,7 @@ from contextlib import redirect_stderr
 from pathlib import Path
 
 from resume_builder.cli import resolve_output_path, resolve_source_path
-from resume_builder.models import ResumeContent
-from resume_builder.parser import parse_resume_markdown, parse_resume_source
+from resume_builder.parser import parse_resume_source
 from resume_builder.renderer import build_doc_from_source
 from resume_builder.sections import SECTION_DEFINITIONS, load_resume_directory
 
@@ -18,18 +17,42 @@ RESUME_SOURCE = PROJECT_ROOT / "source" / "canon-resume"
 
 
 class ResumeDirectoryParserTests(unittest.TestCase):
-    def test_cli_resolves_named_sources_and_relative_outputs_under_their_roots(self) -> None:
-        self.assertEqual(resolve_source_path("canon-resume"), Path("source/canon-resume"))
-        self.assertEqual(resolve_output_path("resume-test.docx"), Path("output/resume-test.docx"))
+    def test_cli_resolves_named_sources_and_relative_outputs_under_their_roots(
+        self,
+    ) -> None:
+        self.assertEqual(
+            resolve_source_path("canon-resume"), Path("source/canon-resume")
+        )
+        self.assertEqual(
+            resolve_output_path("resume-test.docx"), Path("output/resume-test.docx")
+        )
 
-    def test_cli_preserves_existing_legacy_source_and_absolute_output_paths(self) -> None:
+    def test_cli_preserves_existing_source_and_absolute_output_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            source = Path(temp_dir) / "resume.md"
-            source.write_text("legacy", encoding="utf-8")
+            source = Path(temp_dir) / "resume"
+            source.mkdir()
             output = Path(temp_dir) / "resume.docx"
 
             self.assertEqual(resolve_source_path(source), source)
             self.assertEqual(resolve_output_path(output), output)
+
+    def test_single_file_source_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = Path(temp_dir) / "resume.md"
+            source.write_text("---\nname: Test\n---\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(
+                NotADirectoryError, "Resume source must be an existing directory"
+            ):
+                parse_resume_source(source)
+
+    def test_missing_source_directory_is_rejected(self) -> None:
+        source = Path("source/does-not-exist")
+
+        with self.assertRaisesRegex(
+            NotADirectoryError, "Resume source must be an existing directory"
+        ):
+            parse_resume_source(source)
 
     def test_parses_split_resume_source(self) -> None:
         content = parse_resume_source(RESUME_SOURCE)
@@ -59,16 +82,22 @@ class ResumeDirectoryParserTests(unittest.TestCase):
             source = Path(temp_dir)
             (source / "sections").mkdir()
             (source / "meta.md").write_text("---\nname: Test\n---\n", encoding="utf-8")
-            (source / "sections" / "summary.md").write_text("No frontmatter", encoding="utf-8")
+            (source / "sections" / "summary.md").write_text(
+                "No frontmatter", encoding="utf-8"
+            )
 
-            with self.assertRaisesRegex(ValueError, "must start with YAML front matter"):
+            with self.assertRaisesRegex(
+                ValueError, "must start with YAML front matter"
+            ):
                 load_resume_directory(source)
 
     def test_section_files_require_a_title(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source = Path(temp_dir) / "resume"
             shutil.copytree(RESUME_SOURCE, source)
-            (source / "sections" / "summary.md").write_text("---\nother: value\n---\n\nSummary.\n", encoding="utf-8")
+            (source / "sections" / "summary.md").write_text(
+                "---\nother: value\n---\n\nSummary.\n", encoding="utf-8"
+            )
 
             with self.assertRaisesRegex(ValueError, "field 'title' is required"):
                 load_resume_directory(source)
@@ -78,14 +107,21 @@ class ResumeDirectoryParserTests(unittest.TestCase):
             source = Path(temp_dir)
             (source / "sections").mkdir()
 
-            with self.assertRaisesRegex(FileNotFoundError, "Resume metadata file not found"):
+            with self.assertRaisesRegex(
+                FileNotFoundError, "Resume metadata file not found"
+            ):
                 load_resume_directory(source)
 
     def test_each_missing_required_section_warns_once_and_is_not_rendered(self) -> None:
-        required_definitions = [definition for definition in SECTION_DEFINITIONS if not definition.optional]
+        required_definitions = [
+            definition for definition in SECTION_DEFINITIONS if not definition.optional
+        ]
 
         for missing_definition in required_definitions:
-            with self.subTest(filename=missing_definition.filename), tempfile.TemporaryDirectory() as temp_dir:
+            with (
+                self.subTest(filename=missing_definition.filename),
+                tempfile.TemporaryDirectory() as temp_dir,
+            ):
                 source = Path(temp_dir) / "resume"
                 shutil.copytree(RESUME_SOURCE, source)
                 missing_path = source / "sections" / missing_definition.filename
@@ -110,11 +146,17 @@ class ResumeDirectoryParserTests(unittest.TestCase):
                 ]
                 self.assertEqual(headings, expected_headings)
 
-    def test_all_missing_required_sections_warn_and_render_no_section_headings(self) -> None:
+    def test_all_missing_required_sections_warn_and_render_no_section_headings(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source = Path(temp_dir) / "resume"
             shutil.copytree(RESUME_SOURCE, source)
-            required_definitions = [definition for definition in SECTION_DEFINITIONS if not definition.optional]
+            required_definitions = [
+                definition
+                for definition in SECTION_DEFINITIONS
+                if not definition.optional
+            ]
             for definition in required_definitions:
                 (source / "sections" / definition.filename).unlink()
 
@@ -133,7 +175,9 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         ]
         self.assertEqual(headings, [])
 
-    def test_remaining_editable_title_is_preserved_after_an_earlier_omission(self) -> None:
+    def test_remaining_editable_title_is_preserved_after_an_earlier_omission(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source = Path(temp_dir) / "resume"
             shutil.copytree(RESUME_SOURCE, source)
@@ -184,7 +228,9 @@ class ResumeDirectoryParserTests(unittest.TestCase):
                 document = build_doc_from_source(source)
 
         self.assertEqual(stderr.getvalue(), "")
-        self.assertNotIn("selected_project", [section.kind for section in loaded_source.sections])
+        self.assertNotIn(
+            "selected_project", [section.kind for section in loaded_source.sections]
+        )
         self.assertNotIn("selected_project", content.present_sections)
         self.assertIsNone(content.selected_project)
         headings = [
@@ -194,7 +240,9 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         ]
         self.assertNotIn("SELECTED PROJECT", headings)
 
-    def test_selected_project_is_loaded_and_rendered_with_its_editable_title(self) -> None:
+    def test_selected_project_is_loaded_and_rendered_with_its_editable_title(
+        self,
+    ) -> None:
         markdown = """---
 title: Selected Work
 ---
@@ -210,13 +258,19 @@ Tech: Python
         with tempfile.TemporaryDirectory() as temp_dir:
             source = Path(temp_dir) / "resume"
             shutil.copytree(RESUME_SOURCE, source)
-            (source / "sections" / "selected-project.md").write_text(markdown, encoding="utf-8")
+            (source / "sections" / "selected-project.md").write_text(
+                markdown, encoding="utf-8"
+            )
 
             loaded_source = load_resume_directory(source)
             content = parse_resume_source(source)
             document = build_doc_from_source(source)
 
-        selected_section = next(section for section in loaded_source.sections if section.kind == "selected_project")
+        selected_section = next(
+            section
+            for section in loaded_source.sections
+            if section.kind == "selected_project"
+        )
         self.assertEqual(selected_section.title, "Selected Work")
         self.assertIn("selected_project", content.present_sections)
         self.assertEqual(content.section_titles.selected_project, "Selected Work")
@@ -232,10 +286,18 @@ Tech: Python
         ]
         self.assertEqual(
             headings,
-            ["SUMMARY", "CORE SKILLS", "PROFESSIONAL EXPERIENCE", "SELECTED WORK", "EDUCATION"],
+            [
+                "SUMMARY",
+                "CORE SKILLS",
+                "PROFESSIONAL EXPERIENCE",
+                "SELECTED WORK",
+                "EDUCATION",
+            ],
         )
 
-    def test_editable_title_is_passed_to_model_and_renderer_without_changing_section_type(self) -> None:
+    def test_editable_title_is_passed_to_model_and_renderer_without_changing_section_type(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source = Path(temp_dir) / "resume"
             shutil.copytree(RESUME_SOURCE, source)
@@ -257,71 +319,13 @@ Tech: Python
         ]
         self.assertEqual(
             headings,
-            ["PROFESSIONAL PROFILE", "CORE SKILLS", "PROFESSIONAL EXPERIENCE", "EDUCATION"],
+            [
+                "PROFESSIONAL PROFILE",
+                "CORE SKILLS",
+                "PROFESSIONAL EXPERIENCE",
+                "EDUCATION",
+            ],
         )
-
-    def test_resume_content_legacy_constructor_shape_remains_supported(self) -> None:
-        parsed = parse_resume_source(RESUME_SOURCE)
-
-        content = ResumeContent(
-            parsed.meta,
-            parsed.summary,
-            parsed.skills,
-            parsed.experience,
-            parsed.selected_project,
-            parsed.education,
-        )
-
-        self.assertEqual(content.section_titles.summary, "Summary")
-        self.assertEqual(content.summary, parsed.summary)
-
-    def test_single_file_source_remains_supported(self) -> None:
-        markdown = """---
-name: Test Person
-title: Engineer
-tagline: Builds things
-contact_lines:
-  - test@example.com
----
-
-# Summary
-
-A short summary.
-
-# Core Skills
-
-## Languages
-
-Python
-
-# Professional Experience
-
-## Engineer | 2020 – Present
-
-Built things.
-
-# Education
-
-## Computer Science | 2020
-
-Example University
-"""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            source = Path(temp_dir) / "resume.md"
-            source.write_text(markdown, encoding="utf-8")
-
-            content = parse_resume_markdown(source)
-            document = build_doc_from_source(source)
-
-        self.assertEqual(content.summary, ["A short summary."])
-        self.assertIsNone(content.selected_project)
-        self.assertEqual(len(content.experience), 1)
-        headings = [
-            paragraph.text
-            for paragraph in document.paragraphs
-            if getattr(paragraph.style, "name", None) == "Heading 1"
-        ]
-        self.assertEqual(headings, ["SUMMARY", "CORE SKILLS", "PROFESSIONAL EXPERIENCE", "EDUCATION"])
 
 
 if __name__ == "__main__":

@@ -50,7 +50,5 @@ class ResumeContent:
     experience: list[EntryBlock]
     selected_project: EntryBlock | None
     education: list[EducationBlock]
-    section_titles: SectionTitles = SectionTitles()
-    present_sections: frozenset[str] = frozenset(
-        {"summary", "core_skills", "professional_experience", "selected_project", "education"}
-    )
+    section_titles: SectionTitles
+    present_sections: frozenset[str]
