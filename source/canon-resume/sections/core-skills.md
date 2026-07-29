@@ -4,7 +4,7 @@ title: Core Skills
 
 ## **Frontend**
 
-React, TypeScript, JavaScript (ES6+), Swift, SwiftUI, HTML5, CSS3, Styled-Components
+React, TypeScript, JavaScript (ES6+), Swift, SwiftUI, HTML5, CSS3, Sass, Styled Components
 
 ## **Product Development**
 
@@ -12,7 +12,7 @@ Frontend Architecture, API Integration, State Management, UX, Accessibility, Des
 
 ## **Quality & Delivery**
 
-Jest, Cypress, WebDriverIO, XCTest, CI/CD, Build and Release Automation
+Jest, React Testing Library, Cypress, WebDriverIO, XCTest, CI/CD, Build & Release Automation
 
 ## **Developer Experience**
 
@@ -20,4 +20,4 @@ GitHub Actions, Azure DevOps, Jenkins, Nx, Webpack, XcodeGen, Process Automation
 
 ## **Other**
 
-Node.js, REST APIs, Firebase, SignalR, AWS EC2
+Node.js, REST APIs, Docker, Firebase, SignalR, AWS EC2

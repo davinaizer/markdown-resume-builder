@@ -4,14 +4,14 @@ title: Professional Experience
 
 ## **Product Engineer & Co-creator | Alfred — Independent Product Venture | 01/2026 – Present**
 
-Co-creating Alfred with a backend engineer. The product helps people capture ideas for things to do, receive recommendations and turn them into plans. I am responsible for the native iOS application and share the product and technical decisions. It is currently being tested privately through TestFlight.
+Co-creating Alfred with a backend engineer. The product helps people capture ideas for things to do, receive recommendations and turn them into plans. I am responsible for the native iOS application and share responsibility for product and technical direction. It is currently being tested privately through TestFlight.
 
 - Built the SwiftUI application, including authentication, onboarding, idea capture, recommendations, follow-up questions and event planning.
 - Integrated the app with typed REST APIs and implemented session persistence, push notifications, deep links and refresh flows driven by backend state.
 - Structured the application around repositories, services and view models with injected dependencies, allowing core flows to be tested without a live API or shared global state.
 - Added unit tests covering view models, session handling, data mapping, notification routing and asynchronous refresh and cancellation behaviour.
 - Used XcodeGen and repository-level build, test and lint checks to keep project configuration and verification repeatable.
-- Used structured AI-assisted workflows for implementation and refactoring, reviewing the resulting code and running the same verification checks before accepting changes.
+- Used structured AI-assisted workflows for implementation and refactoring, reviewing generated code and verifying it through the same build, test and lint checks before merging changes.
 
 Tech: Swift, SwiftUI, REST APIs, Firebase, SignalR, XcodeGen, XCTest
 
@@ -19,7 +19,7 @@ Tech: Swift, SwiftUI, REST APIs, Firebase, SignalR, XcodeGen, XCTest
 
 ## **Planned Career Break | 11/2024 – 12/2025**
 
-Took a planned break from full-time employment to focus on recovery and reconsider what I wanted from the next stage of my career. Returned to regular hands-on development in January 2026 through Alfred, which gave me a practical and collaborative way to rebuild momentum while working on a product from its early stages.
+Took a planned break from full-time employment to focus on recovery and reconsider what I wanted from the next stage of my career. Returned to regular hands-on development in January 2026 through Alfred, which gave me a practical and collaborative way to resume hands-on product development while working on a product from its early stages.
 
 ---
 
@@ -27,7 +27,7 @@ Took a planned break from full-time employment to focus on recovery and reconsid
 
 Worked on Signal Ocean, a maritime intelligence platform used by brokers, operators and analysts to monitor vessel activity and support commercial decision-making.
 
-- Helped turn a recurring request for new vessel lists into a self-service workflow that users could manage themselves.
+- Converted a recurring request for new vessel lists into a self-service workflow that users could manage themselves.
 - Worked with backend engineers on a metadata-driven approach that made vessel list configuration reusable across different dashboards.
 - Owned the frontend implementation of the vessel list workflows, including API integration, shared state and interactive map experiences.
 - Developed features across vessel monitoring, analytics and operational dashboards using large datasets and map-based interfaces.
@@ -56,7 +56,7 @@ Worked on customer-facing products and the internal tools that supported them, w
 - Identified a bottleneck in the promotional content workflow and built a Node.js tool around the Jira REST API that reduced turnaround time from two to three days to around 15 minutes.
 - Updated legacy internal tooling by redesigning data contracts and integrating with the GitHub REST API to improve content preview and testing.
 - Built internal tools and deployment workflows that removed repetitive work for engineering and content teams.
-- Created onboarding resources, architecture diagrams and dependency maps that helped engineers understand how the projects fitted together.
+- Created onboarding resources, architecture diagrams and dependency maps that reduced onboarding time and helped engineers understand complex projects more quickly.
 - Supported the team through mentoring, code reviews, production troubleshooting and day-to-day technical collaboration.
 
 Tech: React, JavaScript, Node.js, Redux, Svelte, Webpack, GitHub Actions, Jenkins, REST APIs
@@ -67,8 +67,8 @@ Tech: React, JavaScript, Node.js, Redux, Svelte, Webpack, GitHub Actions, Jenkin
 
 Built frontend features and internal tools for promotional platforms used by multiple gaming brands, supporting both customer-facing products and the teams behind them.
 
-- Built a reusable Sass-based design system that improved consistency across promotional interfaces and made new content easier to deliver.
-- Built internal tooling that gave teams better visibility into deployments and made problems easier to investigate.
+- Developed a reusable Sass-based design system that improved consistency across promotional interfaces and made new content easier to deliver.
+- Implemented internal tooling that gave teams better visibility into deployments and made problems easier to investigate.
 - Built a reusable Node.js wrapper around the GitHub REST API that removed the need to clone repositories and reduced deployment processing time from minutes to seconds.
 - Developed React and Redux applications while supporting shared tooling and deployment workflows across the content-delivery systems.
 
@@ -80,7 +80,7 @@ Tech: React, JavaScript, Redux, Sass, Webpack, Gulp, Jenkins
 
 Co-founded a small software company that built browser-based learning platforms and interactive educational products for corporate clients.
 
-- Built and maintained learning platforms, game-based experiences and interactive educational content using JavaScript, HTML, CSS and ActionScript.
+- Designed and maintained learning platforms, game-based experiences and interactive educational content using JavaScript, HTML, CSS and ActionScript.
 - Managed and customised Moodle-based learning environments for different client requirements.
 - Worked directly with clients to understand their needs, adapt the products and support delivery across multiple projects.
 
