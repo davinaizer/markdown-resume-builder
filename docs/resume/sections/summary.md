@@ -2,8 +2,8 @@
 title: Summary
 ---
 
-Senior Software Engineer with 13+ years of experience building web applications with React, TypeScript and modern frontend technologies.
+Senior frontend and product engineer with experience building customer-facing applications, internal tools and the engineering workflows behind them. Most of my commercial work has used React, TypeScript and JavaScript, with more recent hands-on product development in Swift and SwiftUI.
 
-Most of my career has been spent in product teams, where I've enjoyed turning complex problems into maintainable software while making everyday work a little easier for both users and engineers. Alongside customer-facing features, I've built developer tooling and internal tools that reduced manual work, simplified onboarding, and made development and deployment more reliable.
+I have spent much of my career in product teams, turning recurring problems such as manual workflows, inconsistent releases and difficult onboarding into maintainable tools and shared practices. I have worked across frontend delivery, API integration, testing, CI/CD and developer tooling, usually in close collaboration with product, design and backend engineers.
 
-Curiosity has consistently shaped the way I work: understanding how people use software, identifying unnecessary friction, and learning new technologies when they help solve real problems. I'm generally more interested in understanding the problem than chasing the latest framework.
+I prefer understanding the problem before choosing the technology, and I tend to favour practical solutions that are reliable, maintainable and easier for other people to work with.
