@@ -2,22 +2,29 @@
 title: Professional Experience
 ---
 
-## **Career Break | Independent Product & Technical Development | 11/2024 – Present**
+## **Product Engineer & Co-creator | Alfred — Independent Product Venture | 01/2026 – Present**
 
-Took a planned career break after relocating to the UK to focus on professional development, experiment with AI-assisted software development, and build personal product projects while continuing hands-on development with SwiftUI, React and TypeScript.
+Co-creating Alfred with a backend engineer. The product helps people capture ideas for things to do, receive recommendations and turn them into plans. I am responsible for the native iOS application and share the product and technical decisions. It is currently being tested privately through TestFlight.
+
+Built the SwiftUI application, including authentication, onboarding, idea capture, recommendations, follow-up questions and event planning.
+
+Integrated the app with typed REST APIs and implemented session persistence, push notifications, deep links and refresh flows driven by backend state.
+
+Structured the application around repositories, services and view models with injected dependencies, allowing core flows to be tested without a live API or shared global state.
+
+Added unit tests covering view models, session handling, data mapping, notification routing and asynchronous refresh and cancellation behaviour.
+
+Used XcodeGen and repository-level build, test and lint checks to keep the project configuration and verification process repeatable.
+
+Used structured AI-assisted workflows for implementation and refactoring, reviewing the resulting code and running the same verification checks before accepting changes.
+
+Tech: Swift, SwiftUI, REST APIs, Firebase, SignalR, XcodeGen, XCTest
 
 ---
 
-## **Alfred | Product Engineering Project | 2025 – Present**
+## **Planned Career Break | 11/2024 – 12/2025**
 
-Personal SwiftUI project created to learn modern iOS development while exploring AI-assisted development, product design, and ways to reduce cognitive load through thoughtful user workflows.
-
-- Built core product flows including onboarding, recommendations, notifications, async data refresh, and session-aware navigation.
-- Used AI-assisted development to speed up implementation while keeping code review, testing, and verification central to the process.
-- Experimented with testing and verification practices to better understand where AI-assisted development works well and where manual validation remains essential.
-- The project has become an opportunity to explore the full product lifecycle, from UX decisions and frontend architecture through to API integration, testing, and collaborating with a backend engineer.
-
-Tech: SwiftUI, Swift, REST APIs, Firebase, SignalR, XcodeGen, XCTest
+Took a planned break from full-time employment to focus on recovery and reconsider what I wanted from the next stage of my career. Returned to regular hands-on development in January 2026 through Alfred, which gave me a practical and collaborative way to rebuild momentum while working on a product from its early stages.
 
 ---
 
