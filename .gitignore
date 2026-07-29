@@ -11,6 +11,7 @@ site/
 *.egg-info/
 *.egg
 pip-wheel-metadata/
+output/
 
 # Virtual environments
 .venv/

@@ -1,59 +1,114 @@
 # Markdown Resume Builder
 
-This project builds a polished resume DOCX from a Markdown source file with YAML front matter.
+Build a polished resume DOCX from section-based Markdown files with YAML frontmatter.
 
-The current workflow is:
+## Repository layout
 
-- edit [docs/my-resume.md](docs/my-resume.md)
-- run the generator script with `uv`
-- open or upload the resulting [docs/my-resume.docx](docs/my-resume.docx) in Google Docs
+```text
+README.md                    # project documentation
+docs/                        # planning and handoff documents
+source/                      # resume sources
+  canon-resume/              # canonical section-based source
+    meta.md
+    sections/
+      summary.md
+      core-skills.md
+      professional-experience.md
+      selected-project.md    # optional; absent in the canonical source
+      education.md
+output/                      # generated DOCX files; ignored by Git
+resume_builder/              # Python package
+tests/                       # test suite
+```
 
-The source file uses:
+Generated documents are build artifacts, not source files. Keep resume content under `source/`; the CLI creates `output/` when needed, and Git ignores it.
 
-- YAML front matter for metadata and contact lines
-- Markdown body content for the resume sections
+## Section-based sources
 
-The script preserves the resume's current structure and styling, including:
-
-- title block
-- summary
-- core skills
-- professional experience
-- selected project
-- education
-
-Styling is centralized in [tools/resume_theme.py](tools/resume_theme.py). Update that file to adjust the font family, colors, font sizes, spacing, and page layout values used by the generator.
-
-The front matter currently expects:
+A section-based source is a directory containing `meta.md` and normally a `sections/` directory. `meta.md` provides the required shared frontmatter fields:
 
 - `name`
 - `title`
 - `tagline`
-- `contact_lines`
+- `contact_lines` (a non-empty list)
+
+The canonical section definitions establish section identity, parsing rules, and order. Here, **required** means expected and warning-producing when absent, not fatal:
+
+| Order | File | Requirement | Canonical identity |
+| --- | --- | --- | --- |
+| 1 | `summary.md` | Required | Summary |
+| 2 | `core-skills.md` | Required | Core Skills |
+| 3 | `professional-experience.md` | Required | Professional Experience |
+| 4 | `selected-project.md` | Optional | Selected Project |
+| 5 | `education.md` | Required | Education |
+
+Each present section file must begin with YAML frontmatter containing a non-empty `title`. This title is presentation-only: it controls the visible heading in the generated DOCX but does not change section identity, order, or parsing. For example, changing `title: Summary` to `title: Professional Profile` changes the displayed heading while `summary.md` is still parsed as the canonical Summary section.
+
+Files outside the canonical list are not resume sections. Frontmatter fields such as `order` or a renamed title do not override the canonical definitions.
+
+If a required section file is missing, the builder writes a path-specific warning to standard error, skips that section, and continues. It does not render an empty heading or placeholder. If the entire `sections/` directory is absent, the same rule applies to each required file. If the explicitly optional `selected-project.md` is absent, the section is omitted silently.
 
 ## Usage
 
-Install dependencies through `uv` if needed:
+Install dependencies:
 
 ```bash
 uv sync
 ```
 
-Generate the DOCX from the Markdown source:
+The primary explicit command is:
 
 ```bash
-uv run build-resume docs/my-resume.md -o docs/my-resume.docx
+uv run build-resume canon-resume -o resume-test.docx
 ```
 
-You can also output to a different file:
+It reads `source/canon-resume/` and writes `output/resume-test.docx`.
+
+The no-argument form uses the same canonical source and writes `output/resume.docx`:
 
 ```bash
-uv run build-resume docs/my-resume.md -o /path/to/resume.docx
+uv run build-resume
 ```
 
-## Files
+CLI path resolution follows these rules:
 
-- [docs/my-resume.md](docs/my-resume.md): source resume content
-- [docs/my-resume.docx](docs/my-resume.docx): generated Word document
-- [tools/build_resume_docx.py](tools/build_resume_docx.py): Markdown-to-DOCX generator
-- [tools/resume_theme.py](tools/resume_theme.py): default styling/theme values
+- A relative source name that does not already exist resolves under `source/`. For example, `canon-resume` becomes `source/canon-resume`.
+- An existing relative source directory is used as provided.
+- An absolute source directory is used as provided.
+- Source files are not supported; the input must be a section-based source directory.
+- A relative output path always resolves under `output/`.
+- An absolute output path is used as provided.
+
+
+
+## Package structure
+
+- `resume_builder/cli.py`: command-line parsing, path resolution, and orchestration
+- `resume_builder/models.py`: parsed resume data models
+- `resume_builder/parser.py`: section-content parsing
+- `resume_builder/sections.py`: canonical section definitions, discovery, loading, ordering, and missing-file warnings
+- `resume_builder/renderer.py`: DOCX generation
+- `resume_builder/theme.py`: document styling and layout
+
+## Tests and packaging
+
+Run the full test suite:
+
+```bash
+uv run python -m unittest discover -s tests
+```
+
+Run lint and formatting checks:
+
+```bash
+uv run ruff check .
+uv run ruff format --check .
+```
+
+Apply Ruff formatting with `uv run ruff format .`.
+
+Build the distributable package:
+
+```bash
+uv build
+```
