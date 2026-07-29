@@ -4,7 +4,7 @@ This project builds a polished resume DOCX from a Markdown source file with YAML
 
 The current workflow is:
 
-- edit [docs/my-resume.md](docs/my-resume.md)
+- edit [docs/my-resume-product.md](docs/my-resume-product.md)
 - run the generator script with `uv`
 - open or upload the resulting [docs/my-resume.docx](docs/my-resume.docx) in Google Docs
 
@@ -42,18 +42,18 @@ uv sync
 Generate the DOCX from the Markdown source:
 
 ```bash
-uv run build-resume docs/my-resume.md -o docs/my-resume.docx
+uv run build-resume docs/my-resume-product.md -o docs/my-resume.docx
 ```
 
 You can also output to a different file:
 
 ```bash
-uv run build-resume docs/my-resume.md -o /path/to/resume.docx
+uv run build-resume docs/my-resume-product.md -o /path/to/resume.docx
 ```
 
 ## Files
 
-- [docs/my-resume.md](docs/my-resume.md): source resume content
+- [docs/my-resume-product.md](docs/my-resume-product.md): source resume content
 - [docs/my-resume.docx](docs/my-resume.docx): generated Word document
 - [tools/build_resume_docx.py](tools/build_resume_docx.py): Markdown-to-DOCX generator
 - [tools/resume_theme.py](tools/resume_theme.py): default styling/theme values

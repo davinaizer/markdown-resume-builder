@@ -4,12 +4,14 @@
 2026-07-29
 
 ## Current phase
-Phase 0 — Planning
+Phase 1 — Package extraction complete
 
 ## Status summary
-- The refactor has been specified but not implemented yet.
-- No source files have been changed for the architecture split.
-- The plan has been documented in `PLAN.md`.
+- The resume generation logic has been extracted into the `resume_builder` package.
+- The existing `build-resume` CLI command now points to the new package entry point.
+- Compatibility shims remain in `tools/` so legacy imports continue to work.
+- The default CLI source path and README were corrected so `uv run build-resume` works again.
+- The build command was validated successfully with and without explicit input paths.
 
 ## Active goals
 1. Restructure the codebase into smaller modules.
@@ -18,4 +20,4 @@ Phase 0 — Planning
 4. Ensure missing section files only produce warnings.
 
 ## Expected next implementation step
-Start Phase 1 by extracting the current resume generation logic into a dedicated package structure while preserving the existing CLI behavior.
+Start Phase 2 by splitting the resume source into per-section Markdown files with editable frontmatter titles.
