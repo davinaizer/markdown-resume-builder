@@ -23,7 +23,7 @@ docs/resume/
 - `tagline`
 - `contact_lines`
 
-Each section file contains its section content and a `title` frontmatter field. Section titles are currently rendered using the canonical section names; reading the editable titles is planned for the next phase.
+Each section file contains its section content and a required, non-empty `title` frontmatter field. That value controls the visible heading in the generated DOCX. For example, changing `title: Summary` to `title: Professional Profile` changes only the displayed heading; filenames and canonical section definitions still determine section type, ordering, and parsing behavior.
 
 A `selected-project.md` section can also be added when the resume includes a separate selected project. It is explicitly optional and is silently omitted when absent; other missing section files currently fail the build until optional-section handling is completed.
 
@@ -47,7 +47,7 @@ Specify a source directory and output path explicitly:
 uv run build-resume docs/resume -o docs/my-resume.docx
 ```
 
-The previous single-file Markdown format remains supported when an explicit file path is passed.
+The previous single-file Markdown format remains supported when an explicit file path is passed. Its canonical Markdown headings continue to identify and label sections, so existing single-file sources render as before.
 
 ## Package structure
 

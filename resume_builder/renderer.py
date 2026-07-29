@@ -429,7 +429,7 @@ def build_doc_from_source(source_path: Path, theme: ResumeTheme = DEFAULT_THEME)
 
     add_title_block(doc, content.meta, theme)
 
-    add_section_heading(doc, "Summary", theme)
+    add_section_heading(doc, content.section_titles.summary, theme)
     for idx, paragraph in enumerate(content.summary):
         add_body_paragraph(
             doc,
@@ -438,11 +438,11 @@ def build_doc_from_source(source_path: Path, theme: ResumeTheme = DEFAULT_THEME)
             after=theme.summary_after if idx < len(content.summary) - 1 else theme.summary_last_after,
         )
 
-    add_section_heading(doc, "Core Skills", theme)
+    add_section_heading(doc, content.section_titles.core_skills, theme)
     for skill in content.skills:
         add_skill_line(doc, skill.label, skill.value, theme)
 
-    add_section_heading(doc, "Professional Experience", theme)
+    add_section_heading(doc, content.section_titles.professional_experience, theme)
     for entry in content.experience:
         add_experience_entry(
             doc,
@@ -455,7 +455,7 @@ def build_doc_from_source(source_path: Path, theme: ResumeTheme = DEFAULT_THEME)
         )
 
     if content.selected_project is not None:
-        add_section_heading(doc, "Selected Project", theme)
+        add_section_heading(doc, content.section_titles.selected_project, theme)
         add_experience_entry(
             doc,
             content.selected_project.heading_left,
@@ -466,7 +466,7 @@ def build_doc_from_source(source_path: Path, theme: ResumeTheme = DEFAULT_THEME)
             theme,
         )
 
-    add_section_heading(doc, "Education", theme)
+    add_section_heading(doc, content.section_titles.education, theme)
     for item in content.education:
         add_education_entry(doc, item.heading_left, item.date_right, item.school, theme)
 

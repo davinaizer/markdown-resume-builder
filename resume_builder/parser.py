@@ -5,7 +5,14 @@ from pathlib import Path
 import frontmatter
 from frontmatter.default_handlers import YAMLHandler
 
-from resume_builder.models import EducationBlock, EntryBlock, ResumeContent, ResumeMeta, SkillLine
+from resume_builder.models import (
+    EducationBlock,
+    EntryBlock,
+    ResumeContent,
+    ResumeMeta,
+    SectionTitles,
+    SkillLine,
+)
 from resume_builder.sections import load_resume_directory
 
 
@@ -78,6 +85,8 @@ def parse_resume_source(path: Path) -> ResumeContent:
         source = load_resume_directory(path)
         metadata = source.metadata
         content = source.content
+        titles_by_kind = {section.kind: section.title for section in source.sections}
+        section_titles = SectionTitles(**titles_by_kind)
     else:
         text = path.read_text(encoding="utf-8")
         handler = YAMLHandler()
@@ -87,6 +96,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
         post = frontmatter.loads(text, handler=handler)
         metadata = post.metadata
         content = post.content
+        section_titles = SectionTitles()
     name = _require_string(metadata, "name")
     title = _require_string(metadata, "title")
     tagline = _require_string(metadata, "tagline")
@@ -240,6 +250,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
 
     return ResumeContent(
         meta=ResumeMeta(name=name, title=title, tagline=tagline, contact_lines=contact_lines),
+        section_titles=section_titles,
         summary=summary,
         skills=skills,
         experience=experience,

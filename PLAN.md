@@ -14,6 +14,12 @@ This plan follows the project-structure guidance from:
 - Make each section title editable through frontmatter.
 - Allow missing section files to be skipped with a console warning instead of failing the build.
 
+## Implementation status
+- Phases 0–3 are complete.
+- Phase 3 added editable rendered section titles while preserving canonical section identity and legacy single-file behavior.
+- Phase 4 is next: missing expected section files should warn and be skipped, while explicitly optional sections remain silent when absent.
+- Phase 5 remains pending.
+
 ## Desired architecture
 A small, explicit package with one responsibility per module.
 

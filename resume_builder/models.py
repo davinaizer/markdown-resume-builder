@@ -33,6 +33,15 @@ class EducationBlock:
     school: str
 
 
+@dataclass(frozen=True)
+class SectionTitles:
+    summary: str = "Summary"
+    core_skills: str = "Core Skills"
+    professional_experience: str = "Professional Experience"
+    selected_project: str = "Selected Project"
+    education: str = "Education"
+
+
 @dataclass
 class ResumeContent:
     meta: ResumeMeta
@@ -41,3 +50,4 @@ class ResumeContent:
     experience: list[EntryBlock]
     selected_project: EntryBlock | None
     education: list[EducationBlock]
+    section_titles: SectionTitles = SectionTitles()
