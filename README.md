@@ -4,16 +4,17 @@ Build a polished resume DOCX from section-based Markdown files with YAML frontma
 
 ## Source structure
 
-The resume source lives in `docs/resume/`:
+Resume sources live under `source/`. The canonical resume is in `source/canon-resume/`:
 
 ```text
-docs/resume/
-  meta.md
-  sections/
-    summary.md
-    core-skills.md
-    professional-experience.md
-    education.md
+source/
+  canon-resume/
+    meta.md
+    sections/
+      summary.md
+      core-skills.md
+      professional-experience.md
+      education.md
 ```
 
 `meta.md` contains the shared resume metadata:
@@ -25,7 +26,7 @@ docs/resume/
 
 Each section file contains its section content and a required, non-empty `title` frontmatter field. That value controls the visible heading in the generated DOCX. For example, changing `title: Summary` to `title: Professional Profile` changes only the displayed heading; filenames and canonical section definitions still determine section type, ordering, and parsing behavior.
 
-A `selected-project.md` section can also be added when the resume includes a separate selected project. It is explicitly optional and is silently omitted when absent; other missing section files currently fail the build until optional-section handling is completed.
+A `selected-project.md` section can also be added when the resume includes a separate selected project. It is explicitly optional and is silently omitted when absent. If any expected required section file is missing, the builder prints a warning identifying its path, skips that section without rendering an empty heading, and continues with the remaining sections in canonical order.
 
 ## Usage
 
@@ -35,19 +36,19 @@ Install dependencies:
 uv sync
 ```
 
-Generate the DOCX using the default source and output paths:
+Generate `output/resume.docx` from the default `source/canon-resume` source:
 
 ```bash
 uv run build-resume
 ```
 
-Specify a source directory and output path explicitly:
+Specify a named source and output filename. Relative source names resolve under `source/`, and relative output paths resolve under `output/`:
 
 ```bash
-uv run build-resume docs/resume -o docs/my-resume.docx
+uv run build-resume canon-resume -o resume-test.docx
 ```
 
-The previous single-file Markdown format remains supported when an explicit file path is passed. Its canonical Markdown headings continue to identify and label sections, so existing single-file sources render as before.
+This writes `output/resume-test.docx`. Absolute output paths are used unchanged. The previous single-file Markdown format remains supported when an existing explicit file path is passed; its canonical Markdown headings continue to identify and label sections, so existing single-file sources render as before.
 
 ## Package structure
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -64,9 +65,9 @@ def load_resume_directory(path: Path) -> ResumeSource:
     for definition in SECTION_DEFINITIONS:
         section_path = sections_path / definition.filename
         if not section_path.is_file():
-            if definition.optional:
-                continue
-            raise FileNotFoundError(f"Resume section file not found: {section_path}")
+            if not definition.optional:
+                print(f"Warning: resume section file not found; skipping: {section_path}", file=sys.stderr)
+            continue
 
         section = _load_frontmatter_file(section_path)
         title = section.metadata.get("title")

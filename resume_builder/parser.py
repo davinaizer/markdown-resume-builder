@@ -87,6 +87,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
         content = source.content
         titles_by_kind = {section.kind: section.title for section in source.sections}
         section_titles = SectionTitles(**titles_by_kind)
+        present_sections = frozenset(titles_by_kind)
     else:
         text = path.read_text(encoding="utf-8")
         handler = YAMLHandler()
@@ -97,6 +98,9 @@ def parse_resume_source(path: Path) -> ResumeContent:
         metadata = post.metadata
         content = post.content
         section_titles = SectionTitles()
+        present_sections = frozenset(
+            {"summary", "core_skills", "professional_experience", "selected_project", "education"}
+        )
     name = _require_string(metadata, "name")
     title = _require_string(metadata, "title")
     tagline = _require_string(metadata, "tagline")
@@ -251,6 +255,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
     return ResumeContent(
         meta=ResumeMeta(name=name, title=title, tagline=tagline, contact_lines=contact_lines),
         section_titles=section_titles,
+        present_sections=present_sections,
         summary=summary,
         skills=skills,
         experience=experience,

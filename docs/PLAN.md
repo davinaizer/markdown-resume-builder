@@ -15,10 +15,11 @@ This plan follows the project-structure guidance from:
 - Allow missing section files to be skipped with a console warning instead of failing the build.
 
 ## Implementation status
-- Phases 0–3 are complete.
+- Phases 0–4 are complete.
 - Phase 3 added editable rendered section titles while preserving canonical section identity and legacy single-file behavior.
-- Phase 4 is next: missing expected section files should warn and be skipped, while explicitly optional sections remain silent when absent.
-- Phase 5 remains pending.
+- Phase 4 made missing expected section files non-fatal: required files warn and are skipped, explicitly optional files remain silent when absent, and omitted sections render no heading or placeholder.
+- The post-Phase 4 layout follow-up is complete: the canonical source lives at `source/canon-resume/`, generated files resolve under ignored `output/`, the README remains at the repository root, and governance handoff files live under `docs/`.
+- Phase 5 is next.
 
 ## Desired architecture
 A small, explicit package with one responsibility per module.
@@ -29,10 +30,11 @@ Suggested layout:
 markdown-resume-builder/
   README.md
   pyproject.toml
-  PLAN.md
-  PROJECT_STATE.md
   docs/
-    resume/
+    PLAN.md
+    PROJECT_STATE.md
+  source/
+    canon-resume/
       meta.md
       sections/
         summary.md
@@ -40,6 +42,7 @@ markdown-resume-builder/
         professional-experience.md
         selected-project.md   # optional
         education.md
+  output/                     # generated files, ignored by Git
   resume_builder/
     __init__.py
     cli.py
@@ -83,15 +86,15 @@ Optional fields can be added later if needed, such as:
 - Keep the CLI working with the same `build-resume` command.
 
 ### Phase 2 — Resume source split
-- Create `docs/resume/meta.md` for shared metadata.
-- Split `docs/resume-source.md` into per-section files.
+- Create a shared metadata file for the section-based resume source.
+- Split `docs/resume-source.md` into per-section files (now stored under `source/canon-resume/`).
 - Preserve the existing content during the split.
 
 ### Phase 3 — Editable section titles
 - Read section titles from each section file’s frontmatter.
 - Remove hard-coded section title strings from the renderer.
 
-### Phase 4 — Optional sections
+### Phase 4 — Optional sections (complete)
 - Make missing expected section files non-fatal.
 - Emit a warning and continue rendering the remaining sections.
 - Keep explicitly optional sections silent when they are absent.

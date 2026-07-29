@@ -6,10 +6,10 @@ from typing import cast
 from docx import Document
 from docx.document import Document as DocumentType
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
-from docx.styles.style import ParagraphStyle
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
+from docx.styles.style import ParagraphStyle
 
 from resume_builder.models import ResumeMeta
 from resume_builder.parser import parse_resume_source
@@ -429,32 +429,35 @@ def build_doc_from_source(source_path: Path, theme: ResumeTheme = DEFAULT_THEME)
 
     add_title_block(doc, content.meta, theme)
 
-    add_section_heading(doc, content.section_titles.summary, theme)
-    for idx, paragraph in enumerate(content.summary):
-        add_body_paragraph(
-            doc,
-            paragraph,
-            theme,
-            after=theme.summary_after if idx < len(content.summary) - 1 else theme.summary_last_after,
-        )
+    if "summary" in content.present_sections:
+        add_section_heading(doc, content.section_titles.summary, theme)
+        for idx, paragraph in enumerate(content.summary):
+            add_body_paragraph(
+                doc,
+                paragraph,
+                theme,
+                after=theme.summary_after if idx < len(content.summary) - 1 else theme.summary_last_after,
+            )
 
-    add_section_heading(doc, content.section_titles.core_skills, theme)
-    for skill in content.skills:
-        add_skill_line(doc, skill.label, skill.value, theme)
+    if "core_skills" in content.present_sections:
+        add_section_heading(doc, content.section_titles.core_skills, theme)
+        for skill in content.skills:
+            add_skill_line(doc, skill.label, skill.value, theme)
 
-    add_section_heading(doc, content.section_titles.professional_experience, theme)
-    for entry in content.experience:
-        add_experience_entry(
-            doc,
-            entry.heading_left,
-            entry.date_right,
-            entry.description,
-            entry.bullets,
-            entry.tech,
-            theme,
-        )
+    if "professional_experience" in content.present_sections:
+        add_section_heading(doc, content.section_titles.professional_experience, theme)
+        for entry in content.experience:
+            add_experience_entry(
+                doc,
+                entry.heading_left,
+                entry.date_right,
+                entry.description,
+                entry.bullets,
+                entry.tech,
+                theme,
+            )
 
-    if content.selected_project is not None:
+    if "selected_project" in content.present_sections and content.selected_project is not None:
         add_section_heading(doc, content.section_titles.selected_project, theme)
         add_experience_entry(
             doc,
@@ -466,9 +469,10 @@ def build_doc_from_source(source_path: Path, theme: ResumeTheme = DEFAULT_THEME)
             theme,
         )
 
-    add_section_heading(doc, content.section_titles.education, theme)
-    for item in content.education:
-        add_education_entry(doc, item.heading_left, item.date_right, item.school, theme)
+    if "education" in content.present_sections:
+        add_section_heading(doc, content.section_titles.education, theme)
+        for item in content.education:
+            add_education_entry(doc, item.heading_left, item.date_right, item.school, theme)
 
     return doc
 
