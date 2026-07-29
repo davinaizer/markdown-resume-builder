@@ -146,8 +146,6 @@ def parse_resume_source(path: Path) -> ResumeContent:
                 line = lines[i].strip()
                 if is_h2(line):
                     label = clean_md_text(line)
-                    if label.startswith("## "):
-                        label = label[3:]
                     i += 1
                     value = collect_paragraph()
                     skills.append(SkillLine(label=label, value=value))
@@ -158,8 +156,6 @@ def parse_resume_source(path: Path) -> ResumeContent:
                 line = lines[i].strip()
                 if is_h2(line):
                     heading = clean_md_text(line)
-                    if heading.startswith("## "):
-                        heading = heading[3:]
                     heading_left, date_right = split_heading_date(heading)
                     i += 1
                     description = collect_paragraph()
@@ -197,8 +193,6 @@ def parse_resume_source(path: Path) -> ResumeContent:
                 line = lines[i].strip()
                 if is_h2(line):
                     heading = clean_md_text(line)
-                    if heading.startswith("## "):
-                        heading = heading[3:]
                     heading_left, date_right = split_heading_date(heading)
                     i += 1
                     description = collect_paragraph()
@@ -234,8 +228,6 @@ def parse_resume_source(path: Path) -> ResumeContent:
                 line = lines[i].strip()
                 if is_h2(line):
                     heading = clean_md_text(line)
-                    if heading.startswith("## "):
-                        heading = heading[3:]
                     heading_left, date_right = split_heading_date(heading)
                     i += 1
                     school = collect_paragraph()

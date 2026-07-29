@@ -1,33 +1,51 @@
 # Project State
 
 ## Updated
+
 2026-07-29
 
 ## Current phase
-Phase 4 — Optional sections complete
+
+Phase 5 — Cleanup and documentation complete
 
 ## Status summary
-- The project README remains at the repository root; governance, planning, and handoff state live under `docs/`.
-- The resume generation logic lives in the `resume_builder` package.
-- The canonical resume source is split across `source/canon-resume/meta.md` and per-section files in `source/canon-resume/sections/`.
-- The CLI defaults to the named `canon-resume` source under `source/` and writes relative output paths under the ignored `output/` directory.
-- Single-file Markdown sources remain supported for compatibility.
-- Each section file's validated `title` frontmatter is passed through `ResumeContent.section_titles` and controls its visible DOCX heading.
-- Canonical section definitions and filenames still determine section type, ordering, and parsing behavior; editable titles are presentation-only.
-- The current resume has no Selected Project section; it is explicitly optional and is silently omitted when absent.
-- Missing required section files emit a clear path-specific console warning and are skipped; explicitly optional files remain silent when absent.
-- Section presence flows explicitly through the content model so omitted sections render no empty heading or placeholder, while remaining sections retain canonical order and editable titles.
-- Source-oriented APIs accept either the section directory or a legacy single Markdown file; compatibility wrappers preserve the original API names.
-- Legacy single-file sources retain canonical section titles and rendering behavior.
-- Phase 4 changes preserve canonical filename-based identity, ordering, and parsing; editable titles remain presentation-only.
-- The finalized repository layout keeps `README.md` at the root, governance handoff files under `docs/`, resume sources under `source/`, and generated documents under ignored `output/`.
-- All 15 parser, source-loading, CLI path-resolution, compatibility, omission, and rendering tests pass, covering every required omission and both optional-section states.
-- Both `uv run build-resume canon-resume -o resume-test.docx` and the no-argument build succeed with output under `output/`; `uv build` also succeeds with package metadata using the root `README.md`.
-- The complete diff was reviewed for bugs and planning drift; no generated resume output artifacts are tracked or included in the diff.
 
-## Active goals
-1. Continue decomposing section-specific parsing into smaller modules.
-2. Complete final cleanup and documentation.
+- All planned phases are complete.
+- `README.md` remains at the repository root; governance, planning, and handoff documents live under `docs/`.
+- Resume sources live under `source/`, with the canonical source split across `source/canon-resume/meta.md` and `source/canon-resume/sections/`.
+- Generated DOCX files resolve under ignored `output/` and are treated as disposable build artifacts.
+- The CLI defaults to `source/canon-resume/`; `uv run build-resume canon-resume -o resume-test.docx` is the primary explicit example and writes `output/resume-test.docx`.
+- Relative source names resolve under `source/` unless the supplied path already exists. Relative output paths resolve under `output/`. Absolute source and output paths are preserved.
+- Required section files are `summary.md`, `core-skills.md`, `professional-experience.md`, and `education.md`. Here, required means expected and warning-producing when absent, not fatal; missing files are skipped without headings or placeholders.
+- `selected-project.md` is explicitly optional and is silently omitted when absent.
+- Every present section file requires a non-empty frontmatter `title`; that value controls only the rendered heading.
+- Canonical section definitions and filenames determine section identity, ordering, and parsing behavior. Editable titles do not override them.
+- Legacy single-file Markdown sources remain supported through canonical level-one headings. Original file-oriented parser and renderer names and thin historical entry points remain compatibility shims.
+- References to the obsolete `docs/resume-source.md` path are migration history only, not current source or usage guidance.
+- Phase 5 removed four unreachable heading-prefix branches from `resume_builder/parser.py`; `clean_md_text()` had already removed those prefixes, so behavior is unchanged.
+- No resume source content was changed.
+- A final adversarial review found no CLI, parsing, rendering, ordering, omission, title-handling, or legacy-compatibility regressions. It corrected documentation around non-fatal required files, an absent `sections/` directory, retained compatibility paths, and obsolete-path wording.
 
-## Expected next implementation step
-Start Phase 5 cleanup: remove obsolete monolithic-source assumptions, finish documentation, and verify the final workflow.
+## Phase 5 validation
+
+Completed successfully:
+
+- `uv run python -m unittest discover -s tests` — 15 tests passed.
+- `uv run build-resume` — wrote `output/resume.docx`.
+- `uv run build-resume canon-resume -o resume-test.docx` — wrote `output/resume-test.docx`.
+- `uv build` — built the source distribution and wheel successfully using root `README.md` package metadata.
+- `uv run python -m compileall -q resume_builder tools main.py tests` — passed.
+- Project diagnostics — no errors; parser and active package cleanup are clean.
+- `git diff --check` — passed.
+- Final stale-reference and documentation-consistency scans — passed.
+
+Generated `output/`, `build/`, and `dist/` artifacts were removed after validation.
+
+## Known issues and tooling limitations
+
+- Ruff is not declared or installed in the project environment, so `uv run ruff check .` and `uv run ruff format --check .` could not run (`Failed to spawn: ruff`). No formatting dependency was added solely for Phase 5.
+- Editor diagnostics report import-format warnings in the thin historical entry points `main.py` and `tools/build_resume_docx.py`; both compile and remain unchanged for compatibility.
+
+## Recommended next step
+
+Use the completed section-based workflow for resume maintenance. If further engineering work is planned, first decide whether the legacy `tools/`, `main.py`, and file-oriented API shims will remain part of the supported public surface; only then consider a separately versioned compatibility-removal or parser-decomposition change.

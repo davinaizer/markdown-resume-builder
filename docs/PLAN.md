@@ -1,30 +1,23 @@
 # Project Plan
 
 ## Goal
-Refactor the resume builder into a clearer, more maintainable Python package structure and split the resume source into section-based Markdown files with editable section titles.
+
+Refactor the resume builder into a clear, maintainable Python package and use section-based Markdown sources with editable rendered section titles while preserving legacy single-file Markdown compatibility.
 
 This plan follows the project-structure guidance from:
 - https://docs.python-guide.org/writing/structure/
 
-## Current scope
-- Split the monolithic resume generation logic into smaller modules.
-- Split `docs/resume-source.md` into separate files:
-  - one file for global metadata
-  - one file per resume section
-- Make each section title editable through frontmatter.
-- Allow missing section files to be skipped with a console warning instead of failing the build.
+## Final status
 
-## Implementation status
-- Phases 0–4 are complete.
-- Phase 3 added editable rendered section titles while preserving canonical section identity and legacy single-file behavior.
-- Phase 4 made missing expected section files non-fatal: required files warn and are skipped, explicitly optional files remain silent when absent, and omitted sections render no heading or placeholder.
-- The post-Phase 4 layout follow-up is complete: the canonical source lives at `source/canon-resume/`, generated files resolve under ignored `output/`, the README remains at the repository root, and governance handoff files live under `docs/`.
-- Phase 5 is next.
+- Phases 0–5 are complete.
+- Resume generation logic lives in the `resume_builder` package.
+- The original monolithic `docs/resume-source.md` was migrated into the canonical section-based source at `source/canon-resume/`; it is no longer a current source path.
+- The repository root contains `README.md`; governance and handoff documents live under `docs/`; resume sources live under `source/`; generated DOCX files live under ignored `output/`.
+- Editable section titles affect presentation only. Canonical definitions and filenames determine section identity, ordering, and parsing behavior.
+- Missing required section files warn and are skipped. The explicitly optional `selected-project.md` is silently omitted when absent.
+- Existing single-file Markdown sources and compatibility entry points remain supported.
 
-## Desired architecture
-A small, explicit package with one responsibility per module.
-
-Suggested layout:
+## Final architecture
 
 ```text
 markdown-resume-builder/
@@ -40,7 +33,7 @@ markdown-resume-builder/
         summary.md
         core-skills.md
         professional-experience.md
-        selected-project.md   # optional
+        selected-project.md   # optional; absent in canonical source
         education.md
   output/                     # generated files, ignored by Git
   resume_builder/
@@ -51,60 +44,68 @@ markdown-resume-builder/
     sections.py
     renderer.py
     theme.py
+  tests/
+  tools/                      # legacy compatibility modules
+  main.py                     # legacy compatibility entry point
 ```
 
 ## Module responsibilities
-- `cli.py`: command-line entry point and orchestration.
-- `models.py`: dataclasses for resume metadata and section content.
-- `parser.py`: Markdown/frontmatter parsing logic.
-- `sections.py`: section discovery, file loading, ordering, missing-file warnings.
+
+- `cli.py`: command-line parsing, path resolution, and orchestration.
+- `models.py`: dataclasses for resume metadata and parsed section content.
+- `parser.py`: section-content parsing and legacy single-file Markdown parsing.
+- `sections.py`: canonical section definitions, file loading, ordering, and missing-file warnings.
 - `renderer.py`: DOCX generation.
 - `theme.py`: styling and layout constants.
 
-## Section file format
-Each section file should have its own frontmatter, including at least:
-- `title`: editable section heading shown in the generated resume
+Thin historical entry points and original file-oriented parser and renderer function names remain as compatibility shims. They delegate to the source-oriented package implementation and are intentionally retained to avoid breaking existing callers.
 
-Optional fields can be added later if needed, such as:
-- `order`
-- `enabled`
+## Canonical source contract
 
-## Behavior requirements
-- If an expected section file is missing, the build should continue and print a warning.
-- Sections explicitly defined as optional, such as `selected-project.md`, may be absent without a warning.
-- If a section file exists, its frontmatter `title` should control the visible section heading.
-- The build should preserve the current resume output as closely as possible unless a section file is intentionally changed.
+A section-based source contains:
+
+- Required `meta.md` with `name`, `title`, `tagline`, and non-empty `contact_lines` frontmatter.
+- Normally, a `sections/` directory.
+- Required `summary.md`, `core-skills.md`, `professional-experience.md`, and `education.md` section files. In this contract, required means expected and warning-producing when absent, not fatal.
+- Explicitly optional `selected-project.md`.
+
+Every present section file requires a non-empty frontmatter `title`. The title controls only the rendered heading. Canonical section definitions and filenames determine identity, order, and section-specific parsing.
+
+Missing required files produce path-specific warnings and are skipped without an empty heading. If `sections/` itself is absent, each required path produces the same warning. An absent optional file is omitted silently.
 
 ## Implementation phases
 
-### Phase 0 — Planning
-- Document the target architecture and implementation state.
-- No code changes beyond planning/state files.
+### Phase 0 — Planning (complete)
+- Documented target architecture and implementation state.
 
-### Phase 1 — Package extraction
-- Move logic out of the main script into a proper package.
-- Keep the CLI working with the same `build-resume` command.
+### Phase 1 — Package extraction (complete)
+- Moved generation logic into the `resume_builder` package.
+- Preserved the `build-resume` command and compatibility entry points.
 
-### Phase 2 — Resume source split
-- Create a shared metadata file for the section-based resume source.
-- Split `docs/resume-source.md` into per-section files (now stored under `source/canon-resume/`).
-- Preserve the existing content during the split.
+### Phase 2 — Resume source split (complete)
+- Migrated the former `docs/resume-source.md` content into metadata and canonical per-section files, now under `source/canon-resume/`.
+- Preserved intended resume content.
 
-### Phase 3 — Editable section titles
-- Read section titles from each section file’s frontmatter.
-- Remove hard-coded section title strings from the renderer.
+### Phase 3 — Editable section titles (complete)
+- Added section-file frontmatter titles for rendered headings.
+- Preserved canonical filename-based identity, ordering, parsing, and legacy single-file behavior.
 
 ### Phase 4 — Optional sections (complete)
-- Make missing expected section files non-fatal.
-- Emit a warning and continue rendering the remaining sections.
-- Keep explicitly optional sections silent when they are absent.
+- Made missing expected section files non-fatal.
+- Added warnings for missing required files and silent omission for explicitly optional files.
+- Prevented omitted sections from rendering headings or placeholders.
 
-### Phase 5 — Cleanup and documentation
-- Update the README with the new structure and workflow.
-- Remove obsolete monolithic source assumptions.
-- Verify the output DOCX still builds successfully.
+### Phase 5 — Cleanup and documentation (complete)
+- Audited code, configuration, tests, examples, and documentation for obsolete monolithic-source and stale layout assumptions.
+- Documented the complete source contract, warning behavior, title semantics, CLI path resolution, legacy compatibility, and generated-output handling in the root `README.md`.
+- Reviewed compatibility wrappers and retained those needed to preserve package and CLI compatibility.
+- Completed the validation recorded in `docs/PROJECT_STATE.md`.
+- Completed an adversarial final review for behavior changes, compatibility regressions, inaccurate documentation, stale paths, and unnecessary cleanup churn.
+- Removed generated `output/`, `build/`, and `dist/` artifacts.
 
-## Notes
-- Prefer explicit imports and small functions over a large procedural script.
-- Avoid circular dependencies by keeping parsing, models, and rendering separated.
-- Keep generated DOCX files as outputs, not as the source of truth.
+## Maintenance guidance
+
+- Treat `source/` Markdown as the source of truth and `output/` DOCX files as disposable build artifacts.
+- Add or reorder sections by changing the canonical definitions and all affected parsing, rendering, documentation, and tests together; do not use editable frontmatter titles as identifiers.
+- Preserve legacy single-file support unless a future version intentionally introduces and documents a breaking change.
+- Prefer focused changes over broad parser or renderer refactors now that the planned migration is complete.
