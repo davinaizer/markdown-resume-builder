@@ -39,5 +39,5 @@ class ResumeContent:
     summary: list[str]
     skills: list[SkillLine]
     experience: list[EntryBlock]
-    selected_project: EntryBlock
+    selected_project: EntryBlock | None
     education: list[EducationBlock]

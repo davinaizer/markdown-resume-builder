@@ -61,7 +61,8 @@ Optional fields can be added later if needed, such as:
 - `enabled`
 
 ## Behavior requirements
-- If a section file is missing, the build should continue and print a warning.
+- If an expected section file is missing, the build should continue and print a warning.
+- Sections explicitly defined as optional, such as `selected-project.md`, may be absent without a warning.
 - If a section file exists, its frontmatter `title` should control the visible section heading.
 - The build should preserve the current resume output as closely as possible unless a section file is intentionally changed.
 
@@ -85,8 +86,9 @@ Optional fields can be added later if needed, such as:
 - Remove hard-coded section title strings from the renderer.
 
 ### Phase 4 — Optional sections
-- Make missing section files non-fatal.
+- Make missing expected section files non-fatal.
 - Emit a warning and continue rendering the remaining sections.
+- Keep explicitly optional sections silent when they are absent.
 
 ### Phase 5 — Cleanup and documentation
 - Update the README with the new structure and workflow.

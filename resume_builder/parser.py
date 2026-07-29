@@ -6,6 +6,7 @@ import frontmatter
 from frontmatter.default_handlers import YAMLHandler
 
 from resume_builder.models import EducationBlock, EntryBlock, ResumeContent, ResumeMeta, SkillLine
+from resume_builder.sections import load_resume_directory
 
 
 def clean_md_text(text: str) -> str:
@@ -72,20 +73,26 @@ def _require_string_list(metadata: dict, key: str) -> list[str]:
     return cleaned
 
 
-def parse_resume_markdown(path: Path) -> ResumeContent:
-    text = path.read_text(encoding="utf-8")
-    handler = YAMLHandler()
-    if not handler.detect(text):
-        raise ValueError("Resume markdown must start with YAML front matter")
+def parse_resume_source(path: Path) -> ResumeContent:
+    if path.is_dir():
+        source = load_resume_directory(path)
+        metadata = source.metadata
+        content = source.content
+    else:
+        text = path.read_text(encoding="utf-8")
+        handler = YAMLHandler()
+        if not handler.detect(text):
+            raise ValueError("Resume markdown must start with YAML front matter")
 
-    post = frontmatter.loads(text, handler=handler)
-    metadata = post.metadata
+        post = frontmatter.loads(text, handler=handler)
+        metadata = post.metadata
+        content = post.content
     name = _require_string(metadata, "name")
     title = _require_string(metadata, "title")
     tagline = _require_string(metadata, "tagline")
     contact_lines = _require_string_list(metadata, "contact_lines")
 
-    lines = post.content.splitlines()
+    lines = content.splitlines()
     i = 0
 
     summary: list[str] = []
@@ -231,9 +238,6 @@ def parse_resume_markdown(path: Path) -> ResumeContent:
             while i < len(lines) and not is_h1(lines[i]):
                 i += 1
 
-    if selected_project is None:
-        raise ValueError("Selected Project section was not parsed")
-
     return ResumeContent(
         meta=ResumeMeta(name=name, title=title, tagline=tagline, contact_lines=contact_lines),
         summary=summary,
@@ -242,3 +246,8 @@ def parse_resume_markdown(path: Path) -> ResumeContent:
         selected_project=selected_project,
         education=education,
     )
+
+
+def parse_resume_markdown(path: Path) -> ResumeContent:
+    """Compatibility wrapper for callers using the original file-oriented API."""
+    return parse_resume_source(path)

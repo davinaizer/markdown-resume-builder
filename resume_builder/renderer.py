@@ -12,7 +12,7 @@ from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
 from resume_builder.models import ResumeMeta
-from resume_builder.parser import parse_resume_markdown
+from resume_builder.parser import parse_resume_source
 from resume_builder.theme import DEFAULT_THEME, ResumeTheme
 
 
@@ -321,8 +321,8 @@ def add_experience_entry(document: DocumentType, heading_left: str, date_right: 
     add_role_entry(document, heading_left, date_right, description, bullets, tech, theme)
 
 
-def build_doc_from_markdown(md_path: Path, theme: ResumeTheme = DEFAULT_THEME) -> DocumentType:
-    content = parse_resume_markdown(md_path)
+def build_doc_from_source(source_path: Path, theme: ResumeTheme = DEFAULT_THEME) -> DocumentType:
+    content = parse_resume_source(source_path)
     doc = Document()
     clear_document(doc)
 
@@ -454,19 +454,25 @@ def build_doc_from_markdown(md_path: Path, theme: ResumeTheme = DEFAULT_THEME) -
             theme,
         )
 
-    add_section_heading(doc, "Selected Project", theme)
-    add_experience_entry(
-        doc,
-        content.selected_project.heading_left,
-        content.selected_project.date_right,
-        content.selected_project.description,
-        content.selected_project.bullets,
-        content.selected_project.tech,
-        theme,
-    )
+    if content.selected_project is not None:
+        add_section_heading(doc, "Selected Project", theme)
+        add_experience_entry(
+            doc,
+            content.selected_project.heading_left,
+            content.selected_project.date_right,
+            content.selected_project.description,
+            content.selected_project.bullets,
+            content.selected_project.tech,
+            theme,
+        )
 
     add_section_heading(doc, "Education", theme)
     for item in content.education:
         add_education_entry(doc, item.heading_left, item.date_right, item.school, theme)
 
     return doc
+
+
+def build_doc_from_markdown(md_path: Path, theme: ResumeTheme = DEFAULT_THEME) -> DocumentType:
+    """Compatibility wrapper for callers using the original file-oriented API."""
+    return build_doc_from_source(md_path, theme)
