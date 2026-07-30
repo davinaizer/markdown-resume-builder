@@ -27,7 +27,7 @@ class ResumeSource:
     @property
     def content(self) -> str:
         return "\n\n".join(
-            f"# {section.canonical_title}\n\n{section.content}"
+            f"# {section.title}\n\n{section.content}"
             for section in self.sections
         )
 

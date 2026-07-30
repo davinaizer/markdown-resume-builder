@@ -1,6 +1,6 @@
 # Markdown Resume Builder
 
-Build a polished resume DOCX from section-based Markdown files with YAML frontmatter.
+Build a polished resume DOCX or a single combined Markdown file from section-based Markdown files with YAML frontmatter.
 
 ## Repository layout
 
@@ -16,7 +16,7 @@ source/                      # resume sources
       professional-experience.md
       selected-project.md    # optional; absent in the canonical source
       education.md
-output/                      # generated DOCX files; ignored by Git
+output/                      # generated DOCX/Markdown files; ignored by Git
 resume_builder/              # Python package
 tests/                       # test suite
 ```
@@ -63,6 +63,12 @@ uv run build-resume canon-resume -o resume-test.docx
 ```
 
 It reads `source/canon-resume/` and writes `output/resume-test.docx`.
+
+To export the full resume as one Markdown file, give the output a `.md` or `.markdown` suffix:
+
+```bash
+uv run build-resume canon-resume -o resume.md
+```
 
 The no-argument form uses the same canonical source and writes `output/resume.docx`:
 

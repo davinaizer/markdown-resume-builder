@@ -13,7 +13,7 @@ from frontmatter.default_handlers import YAMLHandler
 
 from resume_builder.cli import resolve_output_path, resolve_source_path
 from resume_builder.parser import parse_resume_source
-from resume_builder.renderer import build_doc_from_source
+from resume_builder.renderer import build_doc_from_source, build_markdown_from_source
 from resume_builder.sections import SECTION_DEFINITIONS, load_resume_directory
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -350,6 +350,33 @@ Tech: Python
                 titles["education"].upper(),
             ],
         )
+
+    def test_build_markdown_combines_sections_in_order_with_editable_titles(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = copy_resume_source(temp_dir)
+            summary_path_copy = source / "sections" / "summary.md"
+            summary_markdown = summary_path_copy.read_text(encoding="utf-8").replace(
+                "title: About", "title: Professional Profile", 1
+            )
+            summary_path_copy.write_text(summary_markdown, encoding="utf-8")
+            selected_project_path = source / "sections" / "selected-project.md"
+            selected_project_path.write_text(
+                "---\ntitle: Selected Work\n---\n\n## Project | 2026\n\nDescription.\n\n- Result.\n\nTech: Python\n",
+                encoding="utf-8",
+            )
+
+            markdown = build_markdown_from_source(source)
+
+        self.assertIn("# Davi Naizer Santos", markdown)
+        self.assertIn("**Senior Frontend Engineer**", markdown)
+        self.assertIn("# Professional Profile", markdown)
+        self.assertIn("# Selected Work", markdown)
+        self.assertLess(markdown.index("# Professional Profile"), markdown.index("# Core Skills"))
+        self.assertLess(markdown.index("# Core Skills"), markdown.index("# Professional Experience"))
+        self.assertLess(markdown.index("# Professional Experience"), markdown.index("# Selected Work"))
+        self.assertLess(markdown.index("# Selected Work"), markdown.index("# Education"))
 
     def test_editable_title_is_passed_to_model_and_renderer_without_changing_section_type(
         self,
