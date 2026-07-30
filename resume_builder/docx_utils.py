@@ -9,6 +9,7 @@ from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 from docx.styles.style import ParagraphStyle
 
+from resume_builder.models import ResumeMeta
 from resume_builder.theme import DEFAULT_THEME, ResumeTheme
 
 
@@ -272,7 +273,7 @@ def add_contact_block(
 
 
 def add_title_block(
-    document: DocumentType, meta, theme: ResumeTheme = DEFAULT_THEME
+    document: DocumentType, meta: ResumeMeta, theme: ResumeTheme = DEFAULT_THEME
 ) -> None:
     p = document.add_paragraph(style="Title")
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
