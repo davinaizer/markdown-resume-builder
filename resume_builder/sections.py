@@ -8,7 +8,7 @@ import frontmatter
 from frontmatter.default_handlers import YAMLHandler
 
 from resume_builder.models import SectionKind
-from resume_builder.registry import SECTION_DEFINITIONS
+from resume_builder.registry import SECTION_DEFINITIONS, SectionDefinition
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,6 +40,43 @@ def _load_frontmatter_file(path: Path) -> frontmatter.Post:
     return frontmatter.loads(text, handler=handler)
 
 
+def _ordered_section_definitions(metadata: dict) -> tuple[SectionDefinition, ...]:
+    sections = metadata.get("sections")
+    if sections is None:
+        return SECTION_DEFINITIONS
+    if not isinstance(sections, list) or not sections:
+        raise ValueError(
+            "Front matter field 'sections' is required to be a non-empty list of section kinds"
+        )
+
+    definitions_by_kind = {definition.kind: definition for definition in SECTION_DEFINITIONS}
+    ordered_definitions: list[SectionDefinition] = []
+    seen_kinds: set[str] = set()
+
+    for item in sections:
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError(
+                "Front matter field 'sections' must contain only non-empty section kind strings"
+            )
+        try:
+            kind = SectionKind(item.strip())
+        except ValueError as exc:
+            raise ValueError(
+                f"Unknown section kind in front matter field 'sections': {item!r}"
+            ) from exc
+        if kind in seen_kinds:
+            raise ValueError(
+                f"Duplicate section kind in front matter field 'sections': {item!r}"
+            )
+        definition = definitions_by_kind.get(kind)
+        if definition is None:
+            raise ValueError(f"No canonical section definition exists for kind: {item!r}")
+        ordered_definitions.append(definition)
+        seen_kinds.add(kind)
+
+    return tuple(ordered_definitions)
+
+
 def load_resume_directory(path: Path) -> ResumeSource:
     meta_path = path / "meta.md"
     if not meta_path.is_file():
@@ -49,7 +86,7 @@ def load_resume_directory(path: Path) -> ResumeSource:
     sections_path = path / "sections"
     loaded_sections: list[LoadedSection] = []
 
-    for definition in SECTION_DEFINITIONS:
+    for definition in _ordered_section_definitions(meta.metadata):
         section_path = sections_path / definition.filename
         if not section_path.is_file():
             if not definition.optional:

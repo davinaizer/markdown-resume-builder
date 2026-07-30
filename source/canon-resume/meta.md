@@ -8,4 +8,9 @@ contact_lines:
   - Hove, United Kingdom
   - davi.naizer@gmail.com | linkedin.com/in/davi-naizer
   - English (C1), Portuguese
+sections:
+  - summary
+  - core_skills
+  - professional_experience
+  - education
 ---

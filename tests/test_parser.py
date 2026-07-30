@@ -143,6 +143,41 @@ class ResumeDirectoryParserTests(unittest.TestCase):
             ],
         )
 
+    def test_meta_section_order_controls_rendering_order(self) -> None:
+        titles = read_section_titles(RESUME_SOURCE)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = copy_resume_source(temp_dir)
+            meta_path = source / "meta.md"
+            meta_markdown = meta_path.read_text(encoding="utf-8").replace(
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - education\n",
+                "sections:\n  - education\n  - summary\n  - core_skills\n  - professional_experience\n",
+                1,
+            )
+            meta_path.write_text(meta_markdown, encoding="utf-8")
+
+            loaded_source = load_resume_directory(source)
+            content = parse_resume_source(source)
+            document = build_doc_from_source(source)
+            markdown = build_markdown_from_source(source)
+
+        self.assertEqual(
+            [section.kind for section in loaded_source.sections],
+            ["education", "summary", "core_skills", "professional_experience"],
+        )
+        self.assertEqual(
+            heading_texts(document),
+            [
+                titles["education"].upper(),
+                titles["summary"].upper(),
+                titles["core_skills"].upper(),
+                titles["professional_experience"].upper(),
+            ],
+        )
+        self.assertLess(markdown.index(f"# {titles['education']}"), markdown.index(f"# {titles['summary']}"))
+        self.assertLess(markdown.index(f"# {titles['summary']}"), markdown.index(f"# {titles['core_skills']}"))
+        self.assertLess(markdown.index(f"# {titles['core_skills']}"), markdown.index(f"# {titles['professional_experience']}"))
+        self.assertEqual(content.section_titles.education, titles["education"])
+
     def test_section_files_require_frontmatter(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source = Path(temp_dir)
@@ -318,6 +353,13 @@ Tech: Python
 """
         with tempfile.TemporaryDirectory() as temp_dir:
             source = copy_resume_source(temp_dir)
+            meta_path = source / "meta.md"
+            meta_markdown = meta_path.read_text(encoding="utf-8").replace(
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - education\n",
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - selected_project\n  - education\n",
+                1,
+            )
+            meta_path.write_text(meta_markdown, encoding="utf-8")
             (source / "sections" / "selected-project.md").write_text(
                 markdown, encoding="utf-8"
             )
@@ -356,6 +398,13 @@ Tech: Python
     ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             source = copy_resume_source(temp_dir)
+            meta_path = source / "meta.md"
+            meta_markdown = meta_path.read_text(encoding="utf-8").replace(
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - education\n",
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - selected_project\n  - education\n",
+                1,
+            )
+            meta_path.write_text(meta_markdown, encoding="utf-8")
             summary_path_copy = source / "sections" / "summary.md"
             summary_markdown = summary_path_copy.read_text(encoding="utf-8").replace(
                 "title: About", "title: Professional Profile", 1

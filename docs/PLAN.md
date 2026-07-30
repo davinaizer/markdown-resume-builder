@@ -13,7 +13,7 @@ This plan follows the project-structure guidance from:
 - Resume generation logic lives in the `resume_builder` package.
 - The original monolithic `docs/resume-source.md` was migrated into the canonical section-based source at `source/canon-resume/`; it is no longer a current source path.
 - The repository root contains `README.md`; governance and handoff documents live under `docs/`; resume sources live under `source/`; generated DOCX files live under ignored `output/`.
-- Editable section titles affect presentation only. Canonical definitions and filenames determine section identity, ordering, and parsing behavior.
+- Editable section titles affect presentation only. `meta.md` controls section ordering; canonical definitions and filenames determine section identity and parsing behavior.
 - Missing required section files warn and are skipped. The explicitly optional `selected-project.md` is silently omitted when absent.
 - Only section-based source directories are supported.
 - Ruff provides the project linting and formatting baseline.
@@ -67,7 +67,7 @@ A section-based source contains:
 - Required `summary.md`, `core-skills.md`, `professional-experience.md`, and `education.md` section files. In this contract, required means expected and warning-producing when absent, not fatal.
 - Explicitly optional `selected-project.md`.
 
-Every present section file requires a non-empty frontmatter `title`. The title controls only the rendered heading. Canonical section definitions and filenames determine identity, order, and section-specific parsing.
+Every present section file requires a non-empty frontmatter `title`. The title controls only the rendered heading. `meta.md` determines order; canonical section definitions and filenames determine identity and section-specific parsing.
 
 Missing required files produce path-specific warnings and are skipped without an empty heading. If `sections/` itself is absent, each required path produces the same warning. An absent optional file is omitted silently.
 
@@ -86,7 +86,11 @@ Missing required files produce path-specific warnings and are skipped without an
 
 ### Phase 3 — Editable section titles (complete)
 - Added section-file frontmatter titles for rendered headings.
-- Preserved canonical filename-based identity, ordering, and parsing.
+- Preserved canonical filename-based identity and parsing.
+
+### Phase 3b — Section ordering in metadata (complete)
+- Added a `sections` list to `source/canon-resume/meta.md` to control ordering.
+- Kept the section files content-focused while allowing top-level reordering from a single source of truth.
 
 ### Phase 4 — Optional sections (complete)
 - Made missing expected section files non-fatal.

@@ -24,7 +24,6 @@ from resume_builder.docx_utils import (
 )
 from resume_builder.models import ResumeContent, SectionKind
 from resume_builder.parser import parse_resume_source
-from resume_builder.registry import SECTION_DEFINITIONS
 from resume_builder.sections import load_resume_directory
 from resume_builder.theme import DEFAULT_THEME, ResumeTheme
 
@@ -276,11 +275,9 @@ def build_doc_from_source(
 
     add_title_block(doc, content.meta, theme)
 
-    for definition in SECTION_DEFINITIONS:
-        if definition.kind not in content.present_sections:
-            continue
-        renderer = SECTION_RENDERERS.get(definition.kind)
-        if renderer is not None:
+    for section_kind in content.section_order:
+        renderer = SECTION_RENDERERS.get(section_kind)
+        if renderer is not None and section_kind in content.present_sections:
             renderer(doc, content, theme)
 
     return doc

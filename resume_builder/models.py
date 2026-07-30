@@ -61,3 +61,4 @@ class ResumeContent:
     education: tuple[EducationBlock, ...]
     section_titles: SectionTitles
     present_sections: frozenset[SectionKind]
+    section_order: tuple[SectionKind, ...]

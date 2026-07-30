@@ -264,6 +264,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
     titles_by_kind = {section.kind: section.title for section in source.sections}
     section_titles = SectionTitles(**titles_by_kind)
     present_sections = frozenset(section.kind for section in source.sections)
+    section_order = tuple(section.kind for section in source.sections)
     name = _require_string(metadata, "name")
     title = _require_string(metadata, "title")
     tagline = _require_string(metadata, "tagline")
@@ -287,6 +288,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
         ),
         section_titles=section_titles,
         present_sections=present_sections,
+        section_order=section_order,
         summary=parsed.summary,
         skills=parsed.skills,
         experience=parsed.experience,

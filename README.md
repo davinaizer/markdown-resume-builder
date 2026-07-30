@@ -42,9 +42,19 @@ The canonical section definitions establish section identity, parsing rules, and
 | 4     | `selected-project.md`        | Optional    | Selected Project        |
 | 5     | `education.md`               | Required    | Education               |
 
-Each present section file must begin with YAML frontmatter containing a non-empty `title`. This title is presentation-only: it controls the visible heading in the generated DOCX but does not change section identity, order, or parsing. For example, changing `title: Summary` to `title: Professional Profile` changes the displayed heading while `summary.md` is still parsed as the canonical Summary section.
+Each present section file must begin with YAML frontmatter containing a non-empty `title`. This title is presentation-only: it controls the visible heading in the generated DOCX/Markdown output but does not change section identity or parsing.
 
-Files outside the canonical list are not resume sections. Frontmatter fields such as `order` or a renamed title do not override the canonical definitions.
+The `meta.md` frontmatter may also contain a `sections` list that controls the canonical order. For example:
+
+```yaml
+sections:
+  - summary
+  - core_skills
+  - professional_experience
+  - education
+```
+
+You can reorder sections by editing this list. If the list is omitted, the builder falls back to the built-in canonical order. Files outside the canonical list are not resume sections.
 
 If a required section file is missing, the builder writes a path-specific warning to standard error, skips that section, and continues. It does not render an empty heading or placeholder. If the entire `sections/` directory is absent, the same rule applies to each required file. If the explicitly optional `selected-project.md` is absent, the section is omitted silently.
 
