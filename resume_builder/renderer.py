@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import cast
 
@@ -11,8 +12,9 @@ from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 from docx.styles.style import ParagraphStyle
 
-from resume_builder.models import ResumeMeta
+from resume_builder.models import ResumeContent, ResumeMeta
 from resume_builder.parser import parse_resume_source
+from resume_builder.registry import SECTION_DEFINITIONS
 from resume_builder.theme import DEFAULT_THEME, ResumeTheme
 
 
@@ -456,6 +458,79 @@ def add_education_entry(
     )
 
 
+def render_summary_section(
+    document: DocumentType, content: ResumeContent, theme: ResumeTheme = DEFAULT_THEME
+) -> None:
+    add_section_heading(document, content.section_titles.summary, theme)
+    for idx, paragraph in enumerate(content.summary):
+        add_body_paragraph(
+            document,
+            paragraph,
+            theme,
+            after=theme.summary_after
+            if idx < len(content.summary) - 1
+            else theme.summary_last_after,
+        )
+
+
+def render_core_skills_section(
+    document: DocumentType, content: ResumeContent, theme: ResumeTheme = DEFAULT_THEME
+) -> None:
+    add_section_heading(document, content.section_titles.core_skills, theme)
+    for skill in content.skills:
+        add_skill_line(document, skill.label, skill.value, theme)
+
+
+def render_professional_experience_section(
+    document: DocumentType, content: ResumeContent, theme: ResumeTheme = DEFAULT_THEME
+) -> None:
+    add_section_heading(document, content.section_titles.professional_experience, theme)
+    for entry in content.experience:
+        add_role_entry(
+            document,
+            entry.heading_left,
+            entry.date_right,
+            entry.description,
+            entry.bullets,
+            entry.tech,
+            theme,
+        )
+
+
+def render_selected_project_section(
+    document: DocumentType, content: ResumeContent, theme: ResumeTheme = DEFAULT_THEME
+) -> None:
+    if content.selected_project is None:
+        return
+    add_section_heading(document, content.section_titles.selected_project, theme)
+    add_role_entry(
+        document,
+        content.selected_project.heading_left,
+        content.selected_project.date_right,
+        content.selected_project.description,
+        content.selected_project.bullets,
+        content.selected_project.tech,
+        theme,
+    )
+
+
+def render_education_section(
+    document: DocumentType, content: ResumeContent, theme: ResumeTheme = DEFAULT_THEME
+) -> None:
+    add_section_heading(document, content.section_titles.education, theme)
+    for item in content.education:
+        add_education_entry(document, item.heading_left, item.date_right, item.school, theme)
+
+
+SECTION_RENDERERS: dict[str, Callable[[DocumentType, ResumeContent, ResumeTheme], None]] = {
+    "summary": render_summary_section,
+    "core_skills": render_core_skills_section,
+    "professional_experience": render_professional_experience_section,
+    "selected_project": render_selected_project_section,
+    "education": render_education_section,
+}
+
+
 def build_doc_from_source(
     source_path: Path, theme: ResumeTheme = DEFAULT_THEME
 ) -> DocumentType:
@@ -568,56 +643,11 @@ def build_doc_from_source(
 
     add_title_block(doc, content.meta, theme)
 
-    if "summary" in content.present_sections:
-        add_section_heading(doc, content.section_titles.summary, theme)
-        for idx, paragraph in enumerate(content.summary):
-            add_body_paragraph(
-                doc,
-                paragraph,
-                theme,
-                after=theme.summary_after
-                if idx < len(content.summary) - 1
-                else theme.summary_last_after,
-            )
-
-    if "core_skills" in content.present_sections:
-        add_section_heading(doc, content.section_titles.core_skills, theme)
-        for skill in content.skills:
-            add_skill_line(doc, skill.label, skill.value, theme)
-
-    if "professional_experience" in content.present_sections:
-        add_section_heading(doc, content.section_titles.professional_experience, theme)
-        for entry in content.experience:
-            add_role_entry(
-                doc,
-                entry.heading_left,
-                entry.date_right,
-                entry.description,
-                entry.bullets,
-                entry.tech,
-                theme,
-            )
-
-    if (
-        "selected_project" in content.present_sections
-        and content.selected_project is not None
-    ):
-        add_section_heading(doc, content.section_titles.selected_project, theme)
-        add_role_entry(
-            doc,
-            content.selected_project.heading_left,
-            content.selected_project.date_right,
-            content.selected_project.description,
-            content.selected_project.bullets,
-            content.selected_project.tech,
-            theme,
-        )
-
-    if "education" in content.present_sections:
-        add_section_heading(doc, content.section_titles.education, theme)
-        for item in content.education:
-            add_education_entry(
-                doc, item.heading_left, item.date_right, item.school, theme
-            )
+    for definition in SECTION_DEFINITIONS:
+        if definition.kind not in content.present_sections:
+            continue
+        renderer = SECTION_RENDERERS.get(definition.kind)
+        if renderer is not None:
+            renderer(doc, content, theme)
 
     return doc

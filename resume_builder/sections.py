@@ -7,13 +7,7 @@ from pathlib import Path
 import frontmatter
 from frontmatter.default_handlers import YAMLHandler
 
-
-@dataclass(frozen=True)
-class SectionDefinition:
-    kind: str
-    canonical_title: str
-    filename: str
-    optional: bool = False
+from resume_builder.registry import SECTION_DEFINITIONS
 
 
 @dataclass(frozen=True)
@@ -37,19 +31,6 @@ class ResumeSource:
         )
 
 
-SECTION_DEFINITIONS = (
-    SectionDefinition("summary", "Summary", "summary.md"),
-    SectionDefinition("core_skills", "Core Skills", "core-skills.md"),
-    SectionDefinition(
-        "professional_experience",
-        "Professional Experience",
-        "professional-experience.md",
-    ),
-    SectionDefinition(
-        "selected_project", "Selected Project", "selected-project.md", optional=True
-    ),
-    SectionDefinition("education", "Education", "education.md"),
-)
 
 
 def _load_frontmatter_file(path: Path) -> frontmatter.Post:
