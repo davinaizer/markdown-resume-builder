@@ -8,6 +8,7 @@ from contextlib import redirect_stderr
 from pathlib import Path
 
 import frontmatter
+from docx import Document as load_docx_document
 from frontmatter.default_handlers import YAMLHandler
 
 from resume_builder.cli import resolve_output_path, resolve_source_path
@@ -55,6 +56,32 @@ def heading_texts(document) -> list[str]:
 
 
 class ResumeDirectoryParserTests(unittest.TestCase):
+    def test_canonical_source_builds_a_readable_docx_smoke_test(self) -> None:
+        titles = read_section_titles(RESUME_SOURCE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "resume.docx"
+            stderr = io.StringIO()
+            with redirect_stderr(stderr):
+                document = build_doc_from_source(RESUME_SOURCE)
+                document.save(output)
+
+            reloaded = load_docx_document(output)
+
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertEqual(document.core_properties.title, "Davi Naizer Santos Resume")
+        self.assertEqual(document.core_properties.subject, "Resume")
+        self.assertEqual(document.core_properties.author, "Davi Naizer Santos")
+        self.assertEqual(
+            heading_texts(reloaded),
+            [
+                titles["summary"].upper(),
+                titles["core_skills"].upper(),
+                titles["professional_experience"].upper(),
+                titles["education"].upper(),
+            ],
+        )
+
     def test_cli_resolves_named_sources_and_relative_outputs_under_their_roots(
         self,
     ) -> None:
