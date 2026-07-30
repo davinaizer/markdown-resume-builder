@@ -127,13 +127,13 @@ def parse_resume_source(path: Path) -> ResumeContent:
         section = clean_md_text(line)
         i += 1
 
-        if section == "Summary":
+        if section == SectionTitles.summary:
             while i < len(lines) and not is_h1(lines[i]):
                 line = lines[i].strip()
                 if line and not is_rule(line):
                     summary.append(clean_md_text(line))
                 i += 1
-        elif section == "Core Skills":
+        elif section == SectionTitles.core_skills:
             while i < len(lines) and not is_h1(lines[i]):
                 line = lines[i].strip()
                 if is_h2(line):
@@ -143,7 +143,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
                     skills.append(SkillLine(label=label, value=value))
                 else:
                     i += 1
-        elif section == "Professional Experience":
+        elif section == SectionTitles.professional_experience:
             while i < len(lines) and not is_h1(lines[i]):
                 line = lines[i].strip()
                 if is_h2(line):
@@ -180,7 +180,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
                     )
                 else:
                     i += 1
-        elif section == "Selected Project":
+        elif section == SectionTitles.selected_project:
             while i < len(lines) and not is_h1(lines[i]):
                 line = lines[i].strip()
                 if is_h2(line):
@@ -215,7 +215,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
                     )
                 else:
                     i += 1
-        elif section == "Education":
+        elif section == SectionTitles.education:
             while i < len(lines) and not is_h1(lines[i]):
                 line = lines[i].strip()
                 if is_h2(line):

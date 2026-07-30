@@ -7,6 +7,9 @@ import unittest
 from contextlib import redirect_stderr
 from pathlib import Path
 
+import frontmatter
+from frontmatter.default_handlers import YAMLHandler
+
 from resume_builder.cli import resolve_output_path, resolve_source_path
 from resume_builder.parser import parse_resume_source
 from resume_builder.renderer import build_doc_from_source
@@ -14,6 +17,27 @@ from resume_builder.sections import SECTION_DEFINITIONS, load_resume_directory
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RESUME_SOURCE = PROJECT_ROOT / "source" / "canon-resume"
+
+
+def read_frontmatter_title(path: Path) -> str:
+    text = path.read_text(encoding="utf-8")
+    handler = YAMLHandler()
+    if not handler.detect(text):
+        raise AssertionError(f"Missing YAML front matter in {path}")
+    post = frontmatter.loads(text, handler=handler)
+    title = post.metadata.get("title")
+    if not isinstance(title, str):
+        raise AssertionError(f"Missing title front matter in {path}")
+    return title
+
+
+def read_section_titles(source: Path) -> dict[str, str]:
+    titles: dict[str, str] = {}
+    for definition in SECTION_DEFINITIONS:
+        section_path = source / "sections" / definition.filename
+        if section_path.is_file():
+            titles[definition.kind] = read_frontmatter_title(section_path)
+    return titles
 
 
 class ResumeDirectoryParserTests(unittest.TestCase):
@@ -66,14 +90,15 @@ class ResumeDirectoryParserTests(unittest.TestCase):
 
     def test_loads_section_titles(self) -> None:
         source = load_resume_directory(RESUME_SOURCE)
+        titles = read_section_titles(RESUME_SOURCE)
 
         self.assertEqual(
             [(section.kind, section.title) for section in source.sections],
             [
-                ("summary", "Summary"),
-                ("core_skills", "Core Skills"),
-                ("professional_experience", "Professional Experience"),
-                ("education", "Education"),
+                ("summary", titles["summary"]),
+                ("core_skills", titles["core_skills"]),
+                ("professional_experience", titles["professional_experience"]),
+                ("education", titles["education"]),
             ],
         )
 
@@ -116,6 +141,7 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         required_definitions = [
             definition for definition in SECTION_DEFINITIONS if not definition.optional
         ]
+        titles = read_section_titles(RESUME_SOURCE)
 
         for missing_definition in required_definitions:
             with (
@@ -140,10 +166,18 @@ class ResumeDirectoryParserTests(unittest.TestCase):
                     if getattr(paragraph.style, "name", None) == "Heading 1"
                 ]
                 expected_headings = [
-                    definition.canonical_title.upper()
-                    for definition in required_definitions
-                    if definition != missing_definition
+                    titles["summary"].upper(),
+                    titles["core_skills"].upper(),
+                    titles["professional_experience"].upper(),
+                    titles["education"].upper(),
                 ]
+                missing_index = {
+                    "summary.md": 0,
+                    "core-skills.md": 1,
+                    "professional-experience.md": 2,
+                    "education.md": 3,
+                }[missing_definition.filename]
+                expected_headings.pop(missing_index)
                 self.assertEqual(headings, expected_headings)
 
     def test_all_missing_required_sections_warn_and_render_no_section_headings(
@@ -178,14 +212,16 @@ class ResumeDirectoryParserTests(unittest.TestCase):
     def test_remaining_editable_title_is_preserved_after_an_earlier_omission(
         self,
     ) -> None:
+        titles = read_section_titles(RESUME_SOURCE)
         with tempfile.TemporaryDirectory() as temp_dir:
             source = Path(temp_dir) / "resume"
             shutil.copytree(RESUME_SOURCE, source)
             missing_path = source / "sections" / "core-skills.md"
             missing_path.unlink()
             education_path = source / "sections" / "education.md"
+            education_title = read_frontmatter_title(education_path)
             education_markdown = education_path.read_text(encoding="utf-8").replace(
-                "title: Education", "title: Learning & Credentials", 1
+                f"title: {education_title}", "title: Learning & Credentials", 1
             )
             education_path.write_text(education_markdown, encoding="utf-8")
 
@@ -213,7 +249,11 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         ]
         self.assertEqual(
             headings,
-            ["SUMMARY", "PROFESSIONAL EXPERIENCE", "LEARNING & CREDENTIALS"],
+            [
+                titles["summary"].upper(),
+                titles["professional_experience"].upper(),
+                "LEARNING & CREDENTIALS",
+            ],
         )
 
     def test_missing_optional_section_is_silent_and_not_rendered(self) -> None:
@@ -243,6 +283,7 @@ class ResumeDirectoryParserTests(unittest.TestCase):
     def test_selected_project_is_loaded_and_rendered_with_its_editable_title(
         self,
     ) -> None:
+        titles = read_section_titles(RESUME_SOURCE)
         markdown = """---
 title: Selected Work
 ---
@@ -287,25 +328,26 @@ Tech: Python
         self.assertEqual(
             headings,
             [
-                "SUMMARY",
-                "CORE SKILLS",
-                "PROFESSIONAL EXPERIENCE",
+                titles["summary"].upper(),
+                titles["core_skills"].upper(),
+                titles["professional_experience"].upper(),
                 "SELECTED WORK",
-                "EDUCATION",
+                titles["education"].upper(),
             ],
         )
 
     def test_editable_title_is_passed_to_model_and_renderer_without_changing_section_type(
         self,
     ) -> None:
+        titles = read_section_titles(RESUME_SOURCE)
         with tempfile.TemporaryDirectory() as temp_dir:
             source = Path(temp_dir) / "resume"
             shutil.copytree(RESUME_SOURCE, source)
-            summary_path = source / "sections" / "summary.md"
-            summary_markdown = summary_path.read_text(encoding="utf-8").replace(
-                "title: Summary", "title: Professional Profile", 1
+            summary_path_copy = source / "sections" / "summary.md"
+            summary_markdown = summary_path_copy.read_text(encoding="utf-8").replace(
+                f"title: {titles['summary']}", "title: Professional Profile", 1
             )
-            summary_path.write_text(summary_markdown, encoding="utf-8")
+            summary_path_copy.write_text(summary_markdown, encoding="utf-8")
 
             content = parse_resume_source(source)
             document = build_doc_from_source(source)
@@ -321,9 +363,9 @@ Tech: Python
             headings,
             [
                 "PROFESSIONAL PROFILE",
-                "CORE SKILLS",
-                "PROFESSIONAL EXPERIENCE",
-                "EDUCATION",
+                titles["core_skills"].upper(),
+                titles["professional_experience"].upper(),
+                titles["education"].upper(),
             ],
         )
 
