@@ -1,39 +1,48 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 
 
-@dataclass
+class SectionKind(StrEnum):
+    SUMMARY = "summary"
+    CORE_SKILLS = "core_skills"
+    PROFESSIONAL_EXPERIENCE = "professional_experience"
+    SELECTED_PROJECT = "selected_project"
+    EDUCATION = "education"
+
+
+@dataclass(frozen=True, slots=True)
 class ResumeMeta:
     name: str
     title: str
     tagline: str
-    contact_lines: list[str]
+    contact_lines: tuple[str, ...]
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class SkillLine:
     label: str
     value: str
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class EntryBlock:
     heading_left: str
     date_right: str
     description: str
-    bullets: list[str]
+    bullets: tuple[str, ...]
     tech: str
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class EducationBlock:
     heading_left: str
     date_right: str
     school: str
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class SectionTitles:
     summary: str = "Summary"
     core_skills: str = "Core Skills"
@@ -42,13 +51,13 @@ class SectionTitles:
     education: str = "Education"
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class ResumeContent:
     meta: ResumeMeta
-    summary: list[str]
-    skills: list[SkillLine]
-    experience: list[EntryBlock]
+    summary: tuple[str, ...]
+    skills: tuple[SkillLine, ...]
+    experience: tuple[EntryBlock, ...]
     selected_project: EntryBlock | None
-    education: list[EducationBlock]
+    education: tuple[EducationBlock, ...]
     section_titles: SectionTitles
-    present_sections: frozenset[str]
+    present_sections: frozenset[SectionKind]

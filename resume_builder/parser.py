@@ -9,6 +9,7 @@ from resume_builder.models import (
     EntryBlock,
     ResumeContent,
     ResumeMeta,
+    SectionKind,
     SectionTitles,
     SkillLine,
 )
@@ -94,7 +95,7 @@ def parse_role_like_entry(lines: list[str], start: int) -> tuple[EntryBlock, int
             heading_left=heading_left,
             date_right=date_right,
             description=description,
-            bullets=bullets,
+            bullets=tuple(bullets),
             tech=tech,
         ),
         i,
@@ -111,16 +112,16 @@ def parse_education_entry(lines: list[str], start: int) -> tuple[EducationBlock,
     )
 
 
-def parse_summary_lines(lines: list[str]) -> list[str]:
+def parse_summary_lines(lines: list[str]) -> tuple[str, ...]:
     summary: list[str] = []
     for line in lines:
         line = line.strip()
         if line and not is_rule(line):
             summary.append(clean_md_text(line))
-    return summary
+    return tuple(summary)
 
 
-def parse_skill_lines(lines: list[str]) -> list[SkillLine]:
+def parse_skill_lines(lines: list[str]) -> tuple[SkillLine, ...]:
     skills: list[SkillLine] = []
     i = 0
     while i < len(lines):
@@ -134,10 +135,10 @@ def parse_skill_lines(lines: list[str]) -> list[SkillLine]:
             skills.append(SkillLine(label=label, value=value))
         else:
             i += 1
-    return skills
+    return tuple(skills)
 
 
-def parse_experience_lines(lines: list[str]) -> list[EntryBlock]:
+def parse_experience_lines(lines: list[str]) -> tuple[EntryBlock, ...]:
     experience: list[EntryBlock] = []
     i = 0
     while i < len(lines):
@@ -150,7 +151,7 @@ def parse_experience_lines(lines: list[str]) -> list[EntryBlock]:
             experience.append(entry)
         else:
             i += 1
-    return experience
+    return tuple(experience)
 
 
 def parse_selected_project_lines(lines: list[str]) -> EntryBlock | None:
@@ -168,7 +169,7 @@ def parse_selected_project_lines(lines: list[str]) -> EntryBlock | None:
     return selected_project
 
 
-def parse_education_lines(lines: list[str]) -> list[EducationBlock]:
+def parse_education_lines(lines: list[str]) -> tuple[EducationBlock, ...]:
     education: list[EducationBlock] = []
     i = 0
     while i < len(lines):
@@ -181,19 +182,19 @@ def parse_education_lines(lines: list[str]) -> list[EducationBlock]:
             education.append(item)
         else:
             i += 1
-    return education
+    return tuple(education)
 
 
-@dataclass
+@dataclass(slots=True)
 class ParsedSections:
-    summary: list[str]
-    skills: list[SkillLine]
-    experience: list[EntryBlock]
+    summary: tuple[str, ...]
+    skills: tuple[SkillLine, ...]
+    experience: tuple[EntryBlock, ...]
     selected_project: EntryBlock | None
-    education: list[EducationBlock]
+    education: tuple[EducationBlock, ...]
 
 
-SECTION_PARSERS: dict[str, Callable[[LoadedSection, ParsedSections], None]] = {}
+SECTION_PARSERS: dict[SectionKind, Callable[[LoadedSection, ParsedSections], None]] = {}
 
 
 def _parse_summary_section(section: LoadedSection, parsed: ParsedSections) -> None:
@@ -220,11 +221,11 @@ def _parse_education_section(section: LoadedSection, parsed: ParsedSections) -> 
 
 SECTION_PARSERS.update(
     {
-        "summary": _parse_summary_section,
-        "core_skills": _parse_core_skills_section,
-        "professional_experience": _parse_professional_experience_section,
-        "selected_project": _parse_selected_project_section,
-        "education": _parse_education_section,
+        SectionKind.SUMMARY: _parse_summary_section,
+        SectionKind.CORE_SKILLS: _parse_core_skills_section,
+        SectionKind.PROFESSIONAL_EXPERIENCE: _parse_professional_experience_section,
+        SectionKind.SELECTED_PROJECT: _parse_selected_project_section,
+        SectionKind.EDUCATION: _parse_education_section,
     }
 )
 
@@ -238,7 +239,7 @@ def _require_string(metadata: dict, key: str) -> str:
     return clean_md_text(value)
 
 
-def _require_string_list(metadata: dict, key: str) -> list[str]:
+def _require_string_list(metadata: dict, key: str) -> tuple[str, ...]:
     value = metadata.get(key)
     if not isinstance(value, list) or not value:
         raise ValueError(
@@ -251,7 +252,7 @@ def _require_string_list(metadata: dict, key: str) -> list[str]:
                 f"Front matter field '{key}' must contain only non-empty strings"
             )
         cleaned.append(item.strip())
-    return cleaned
+    return tuple(cleaned)
 
 
 def parse_resume_source(path: Path) -> ResumeContent:
@@ -269,11 +270,11 @@ def parse_resume_source(path: Path) -> ResumeContent:
     contact_lines = _require_string_list(metadata, "contact_lines")
 
     parsed = ParsedSections(
-        summary=[],
-        skills=[],
-        experience=[],
+        summary=(),
+        skills=(),
+        experience=(),
         selected_project=None,
-        education=[],
+        education=(),
     )
     for section in source.sections:
         parser = SECTION_PARSERS.get(section.kind)

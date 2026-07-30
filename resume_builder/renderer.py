@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import cast
 
@@ -12,7 +12,7 @@ from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 from docx.styles.style import ParagraphStyle
 
-from resume_builder.models import ResumeContent, ResumeMeta
+from resume_builder.models import ResumeContent, ResumeMeta, SectionKind
 from resume_builder.parser import parse_resume_source
 from resume_builder.registry import SECTION_DEFINITIONS
 from resume_builder.theme import DEFAULT_THEME, ResumeTheme
@@ -271,7 +271,7 @@ def add_contact_line(
 
 
 def add_contact_block(
-    document: DocumentType, lines: list[str], theme: ResumeTheme = DEFAULT_THEME
+    document: DocumentType, lines: Sequence[str], theme: ResumeTheme = DEFAULT_THEME
 ) -> None:
     for idx, line in enumerate(lines):
         add_contact_line(document, line, theme, is_last=idx == len(lines) - 1)
@@ -334,7 +334,7 @@ def add_role_entry(
     heading_left: str,
     date_right: str,
     description: str,
-    bullets: list[str],
+    bullets: Sequence[str],
     tech: str,
     theme: ResumeTheme = DEFAULT_THEME,
 ) -> None:
@@ -522,12 +522,14 @@ def render_education_section(
         add_education_entry(document, item.heading_left, item.date_right, item.school, theme)
 
 
-SECTION_RENDERERS: dict[str, Callable[[DocumentType, ResumeContent, ResumeTheme], None]] = {
-    "summary": render_summary_section,
-    "core_skills": render_core_skills_section,
-    "professional_experience": render_professional_experience_section,
-    "selected_project": render_selected_project_section,
-    "education": render_education_section,
+SECTION_RENDERERS: dict[
+    SectionKind, Callable[[DocumentType, ResumeContent, ResumeTheme], None]
+] = {
+    SectionKind.SUMMARY: render_summary_section,
+    SectionKind.CORE_SKILLS: render_core_skills_section,
+    SectionKind.PROFESSIONAL_EXPERIENCE: render_professional_experience_section,
+    SectionKind.SELECTED_PROJECT: render_selected_project_section,
+    SectionKind.EDUCATION: render_education_section,
 }
 
 

@@ -64,9 +64,9 @@ class ResumeDirectoryParserTests(unittest.TestCase):
             stderr = io.StringIO()
             with redirect_stderr(stderr):
                 document = build_doc_from_source(RESUME_SOURCE)
-                document.save(output)
+                document.save(str(output))
 
-            reloaded = load_docx_document(output)
+            reloaded = load_docx_document(str(output))
 
         self.assertEqual(stderr.getvalue(), "")
         self.assertEqual(document.core_properties.title, "Davi Naizer Santos Resume")
@@ -266,7 +266,7 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         self.assertIn(str(missing_path), parse_stderr.getvalue())
         self.assertIn(str(missing_path), render_stderr.getvalue())
         self.assertNotIn("core_skills", content.present_sections)
-        self.assertEqual(content.skills, [])
+        self.assertEqual(content.skills, ())
         self.assertEqual(len(content.summary), 3)
         self.assertEqual(len(content.experience), 7)
         self.assertEqual(len(content.education), 2)
@@ -337,7 +337,7 @@ Tech: Python
         self.assertIsNotNone(content.selected_project)
         assert content.selected_project is not None
         self.assertEqual(content.selected_project.heading_left, "Project")
-        self.assertEqual(content.selected_project.bullets, ["Result."])
+        self.assertEqual(content.selected_project.bullets, ("Result.",))
         self.assertEqual(content.selected_project.tech, "Python")
         headings = heading_texts(document)
         self.assertEqual(
