@@ -58,6 +58,57 @@ def next_content_line(lines: list[str], start: int) -> tuple[str | None, int]:
     return None, len(lines)
 
 
+def take_paragraph(lines: list[str], start: int) -> tuple[str, int]:
+    line, idx = next_content_line(lines, start)
+    if line is None:
+        raise ValueError("Expected paragraph content")
+    return clean_md_text(line), idx + 1
+
+
+def parse_role_like_entry(lines: list[str], start: int) -> tuple[EntryBlock, int]:
+    heading = clean_md_text(lines[start].strip())
+    heading_left, date_right = split_heading_date(heading)
+    description, i = take_paragraph(lines, start + 1)
+    bullets: list[str] = []
+    tech = ""
+    while i < len(lines):
+        peek = lines[i].strip()
+        if not peek:
+            i += 1
+            continue
+        if is_rule(peek) or is_h2(peek) or is_h1(peek):
+            break
+        if is_bullet(peek):
+            bullets.append(clean_md_text(peek[2:]))
+            i += 1
+            continue
+        if peek.startswith("Tech:"):
+            tech = clean_md_text(peek)[5:].strip()
+            i += 1
+            break
+        i += 1
+    return (
+        EntryBlock(
+            heading_left=heading_left,
+            date_right=date_right,
+            description=description,
+            bullets=bullets,
+            tech=tech,
+        ),
+        i,
+    )
+
+
+def parse_education_entry(lines: list[str], start: int) -> tuple[EducationBlock, int]:
+    heading = clean_md_text(lines[start].strip())
+    heading_left, date_right = split_heading_date(heading)
+    school, i = take_paragraph(lines, start + 1)
+    return (
+        EducationBlock(heading_left=heading_left, date_right=date_right, school=school),
+        i,
+    )
+
+
 def _require_string(metadata: dict, key: str) -> str:
     value = metadata.get(key)
     if not isinstance(value, str) or not value.strip():
@@ -107,14 +158,6 @@ def parse_resume_source(path: Path) -> ResumeContent:
     selected_project: EntryBlock | None = None
     education: list[EducationBlock] = []
 
-    def collect_paragraph() -> str:
-        nonlocal i
-        line, idx = next_content_line(lines, i)
-        if line is None:
-            raise ValueError("Expected paragraph content")
-        i = idx + 1
-        return clean_md_text(line)
-
     while i < len(lines):
         line = lines[i].strip()
         if not line or is_rule(line):
@@ -138,8 +181,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
                 line = lines[i].strip()
                 if is_h2(line):
                     label = clean_md_text(line)
-                    i += 1
-                    value = collect_paragraph()
+                    value, i = take_paragraph(lines, i + 1)
                     skills.append(SkillLine(label=label, value=value))
                 else:
                     i += 1
@@ -147,89 +189,23 @@ def parse_resume_source(path: Path) -> ResumeContent:
             while i < len(lines) and not is_h1(lines[i]):
                 line = lines[i].strip()
                 if is_h2(line):
-                    heading = clean_md_text(line)
-                    heading_left, date_right = split_heading_date(heading)
-                    i += 1
-                    description = collect_paragraph()
-                    bullets: list[str] = []
-                    tech = ""
-                    while i < len(lines):
-                        peek = lines[i].strip()
-                        if not peek:
-                            i += 1
-                            continue
-                        if is_rule(peek) or is_h2(peek) or is_h1(peek):
-                            break
-                        if is_bullet(peek):
-                            bullets.append(clean_md_text(peek[2:]))
-                            i += 1
-                            continue
-                        if peek.startswith("Tech:"):
-                            tech = clean_md_text(peek)[5:].strip()
-                            i += 1
-                            break
-                        i += 1
-                    experience.append(
-                        EntryBlock(
-                            heading_left=heading_left,
-                            date_right=date_right,
-                            description=description,
-                            bullets=bullets,
-                            tech=tech,
-                        )
-                    )
+                    entry, i = parse_role_like_entry(lines, i)
+                    experience.append(entry)
                 else:
                     i += 1
         elif section == SectionTitles.selected_project:
             while i < len(lines) and not is_h1(lines[i]):
                 line = lines[i].strip()
                 if is_h2(line):
-                    heading = clean_md_text(line)
-                    heading_left, date_right = split_heading_date(heading)
-                    i += 1
-                    description = collect_paragraph()
-                    project_bullets: list[str] = []
-                    tech = ""
-                    while i < len(lines):
-                        peek = lines[i].strip()
-                        if not peek:
-                            i += 1
-                            continue
-                        if is_rule(peek) or is_h2(peek) or is_h1(peek):
-                            break
-                        if is_bullet(peek):
-                            project_bullets.append(clean_md_text(peek[2:]))
-                            i += 1
-                            continue
-                        if peek.startswith("Tech:"):
-                            tech = clean_md_text(peek)[5:].strip()
-                            i += 1
-                            break
-                        i += 1
-                    selected_project = EntryBlock(
-                        heading_left=heading_left,
-                        date_right=date_right,
-                        description=description,
-                        bullets=project_bullets,
-                        tech=tech,
-                    )
+                    selected_project, i = parse_role_like_entry(lines, i)
                 else:
                     i += 1
         elif section == SectionTitles.education:
             while i < len(lines) and not is_h1(lines[i]):
                 line = lines[i].strip()
                 if is_h2(line):
-                    heading = clean_md_text(line)
-                    heading_left, date_right = split_heading_date(heading)
-                    i += 1
-                    school = collect_paragraph()
-                    education.append(
-                        EducationBlock(
-                            heading_left=heading_left,
-                            date_right=date_right,
-                            school=school,
-                        )
-                    )
+                    item, i = parse_education_entry(lines, i)
+                    education.append(item)
                 else:
                     i += 1
         else:

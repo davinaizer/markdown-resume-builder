@@ -131,6 +131,22 @@ def clear_document(document: DocumentType) -> None:
             body.remove(child)
 
 
+def create_two_column_entry_cells(
+    document: DocumentType, theme: ResumeTheme = DEFAULT_THEME
+):
+    table = document.add_table(rows=1, cols=2)
+    set_table_fixed_width(
+        table,
+        [Inches(theme.role_table_left_width), Inches(theme.role_table_right_width)],
+    )
+    remove_table_borders(table)
+
+    left, right = table.rows[0].cells
+    set_cell_margins(left, top=0, start=0, bottom=0, end=0)
+    set_cell_margins(right, top=0, start=0, bottom=0, end=0)
+    return left, right
+
+
 def set_table_fixed_width(table, widths: list[Inches]) -> None:
     table.autofit = False
     tbl_pr = table._tbl.tblPr
@@ -320,16 +336,7 @@ def add_role_entry(
     tech: str,
     theme: ResumeTheme = DEFAULT_THEME,
 ) -> None:
-    table = document.add_table(rows=1, cols=2)
-    set_table_fixed_width(
-        table,
-        [Inches(theme.role_table_left_width), Inches(theme.role_table_right_width)],
-    )
-    remove_table_borders(table)
-
-    left, right = table.rows[0].cells
-    set_cell_margins(left, top=0, start=0, bottom=0, end=0)
-    set_cell_margins(right, top=0, start=0, bottom=0, end=0)
+    left, right = create_two_column_entry_cells(document, theme)
 
     p_left = left.paragraphs[0]
     p_left.style = "Heading 2"
@@ -412,15 +419,7 @@ def add_education_entry(
     school: str,
     theme: ResumeTheme = DEFAULT_THEME,
 ) -> None:
-    table = document.add_table(rows=1, cols=2)
-    set_table_fixed_width(
-        table,
-        [Inches(theme.role_table_left_width), Inches(theme.role_table_right_width)],
-    )
-    remove_table_borders(table)
-    left, right = table.rows[0].cells
-    set_cell_margins(left, top=0, start=0, bottom=0, end=0)
-    set_cell_margins(right, top=0, start=0, bottom=0, end=0)
+    left, right = create_two_column_entry_cells(document, theme)
 
     p_left = left.paragraphs[0]
     p_left.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -454,20 +453,6 @@ def add_education_entry(
         before=2,
         after=theme.education_school_after,
         line_spacing=theme.compact_line_spacing,
-    )
-
-
-def add_experience_entry(
-    document: DocumentType,
-    heading_left: str,
-    date_right: str,
-    description: str,
-    bullets: list[str],
-    tech: str,
-    theme: ResumeTheme = DEFAULT_THEME,
-) -> None:
-    add_role_entry(
-        document, heading_left, date_right, description, bullets, tech, theme
     )
 
 
@@ -603,7 +588,7 @@ def build_doc_from_source(
     if "professional_experience" in content.present_sections:
         add_section_heading(doc, content.section_titles.professional_experience, theme)
         for entry in content.experience:
-            add_experience_entry(
+            add_role_entry(
                 doc,
                 entry.heading_left,
                 entry.date_right,
@@ -618,7 +603,7 @@ def build_doc_from_source(
         and content.selected_project is not None
     ):
         add_section_heading(doc, content.section_titles.selected_project, theme)
-        add_experience_entry(
+        add_role_entry(
             doc,
             content.selected_project.heading_left,
             content.selected_project.date_right,
