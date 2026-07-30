@@ -40,7 +40,7 @@ Tech: React, TypeScript, MobX, OpenLayers, Node.js, Azure DevOps, C#, REST APIs
 
 My role gradually became less about building individual features and more about helping the team improve how they worked, from onboarding and shared tooling to release processes.
 
-- Introduced Pull Request automation and CI quality gates across 29 frontend repositories, reducing manual work and making releases more consistent.
+- Designed and implemented GitHub Actions workflows and SonarQube quality gates across 29 frontend repositories, including Pull Request validation and automated code review decoration, reducing manual work and making releases more consistent.
 - Worked with architects, backend engineers and frontend teams to improve tooling shared across React projects.
 - Created architecture diagrams, dependency maps and onboarding guides that reduced reliance on knowledge held by individual engineers.
 - Contributed to technical roadmaps and frontend improvements while balancing longer-term maintenance with ongoing product delivery.

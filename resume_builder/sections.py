@@ -7,27 +7,22 @@ from pathlib import Path
 import frontmatter
 from frontmatter.default_handlers import YAMLHandler
 
-
-@dataclass(frozen=True)
-class SectionDefinition:
-    kind: str
-    canonical_title: str
-    filename: str
-    optional: bool = False
+from resume_builder.models import SectionKind
+from resume_builder.registry import SECTION_DEFINITIONS
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class LoadedSection:
-    kind: str
+    kind: SectionKind
     canonical_title: str
     title: str
     content: str
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ResumeSource:
     metadata: dict
-    sections: list[LoadedSection]
+    sections: tuple[LoadedSection, ...]
 
     @property
     def content(self) -> str:
@@ -35,21 +30,6 @@ class ResumeSource:
             f"# {section.canonical_title}\n\n{section.content}"
             for section in self.sections
         )
-
-
-SECTION_DEFINITIONS = (
-    SectionDefinition("summary", "Summary", "summary.md"),
-    SectionDefinition("core_skills", "Core Skills", "core-skills.md"),
-    SectionDefinition(
-        "professional_experience",
-        "Professional Experience",
-        "professional-experience.md",
-    ),
-    SectionDefinition(
-        "selected_project", "Selected Project", "selected-project.md", optional=True
-    ),
-    SectionDefinition("education", "Education", "education.md"),
-)
 
 
 def _load_frontmatter_file(path: Path) -> frontmatter.Post:
@@ -94,4 +74,4 @@ def load_resume_directory(path: Path) -> ResumeSource:
             )
         )
 
-    return ResumeSource(metadata=meta.metadata, sections=loaded_sections)
+    return ResumeSource(metadata=meta.metadata, sections=tuple(loaded_sections))

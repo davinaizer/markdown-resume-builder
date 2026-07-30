@@ -2,51 +2,34 @@
 
 ## Updated
 
-2026-07-29
+2026-07-30
 
 ## Current phase
 
-Phase 6 — API simplification and development tooling complete
+Refactor planning complete; Phase 5 verification and cleanup is complete.
 
 ## Status summary
 
-- All planned phases are complete.
-- `README.md` remains at the repository root; governance, planning, and handoff documents live under `docs/`.
-- Resume sources live under `source/`, with the canonical source split across `source/canon-resume/meta.md` and `source/canon-resume/sections/`.
-- Generated DOCX files resolve under ignored `output/` and are treated as disposable build artifacts.
-- The CLI defaults to `source/canon-resume/`; `uv run build-resume canon-resume -o resume-test.docx` is the primary explicit example and writes `output/resume-test.docx`.
-- Relative source names resolve under `source/` unless the supplied path already exists. Relative output paths resolve under `output/`. Absolute source and output paths are preserved.
-- Required section files are `summary.md`, `core-skills.md`, `professional-experience.md`, and `education.md`. Here, required means expected and warning-producing when absent, not fatal; missing files are skipped without headings or placeholders.
-- `selected-project.md` is explicitly optional and is silently omitted when absent.
-- Every present section file requires a non-empty frontmatter `title`; that value controls only the rendered heading.
-- Canonical section definitions and filenames determine section identity, ordering, and parsing behavior. Editable titles do not override them.
-- Resume inputs must be section-based source directories; file inputs raise `NotADirectoryError`.
-- Ruff is installed as a development dependency for linting and formatting.
-- Phase 5 removed four unreachable heading-prefix branches from `resume_builder/parser.py`; `clean_md_text()` had already removed those prefixes, so behavior is unchanged.
-- No resume source content was changed.
-- Unsupported source paths, APIs, entry points, model defaults, tests, packaging references, and documentation have been removed.
+- The repo has a dedicated refactor plan at `docs/REFACTOR_EXECUTION_PLAN.md`.
+- Phase 1 added a canonical-source DOCX smoke test in `tests/test_parser.py`.
+- Phase 2 centralized canonical section definitions in `resume_builder/registry.py` and switched parser/render dispatch to registry-driven lookup.
+- Phase 3 tightened the domain model in `resume_builder/models.py` by making value objects frozen/slotted, switching content containers to tuples, and introducing the typed `SectionKind` enum.
+- Phase 4 extracted reusable DOCX styling helpers into `resume_builder/docx_utils.py`, leaving `renderer.py` focused on composition and orchestration.
+- Phase 5 completed final validation and a small cleanup pass.
+- The smoke test still covers parse → render → save → reload for `source/canon-resume`.
+- Existing parser/path-resolution tests remain intact.
+- No known issues remain from the phased refactor work.
 
-## Final validation
+## Validation completed
 
-Completed successfully:
-
-- `uv run python -m unittest discover -s tests` — 15 tests passed.
-- `uv run build-resume` — wrote `output/resume.docx`.
-- `uv run build-resume canon-resume -o resume-test.docx` — wrote `output/resume-test.docx`.
-- `uv build` — built the source distribution and wheel successfully using root `README.md` package metadata.
+- `uv run python -m unittest tests.test_parser` — passed with 16 tests.
+- `uv run python -m unittest discover -s tests` — passed with 16 tests.
 - `uv run ruff check .` — passed.
-- `uv run ruff format --check .` — 16 files already formatted.
 - `uv run python -m compileall -q resume_builder tests` — passed.
-- Project diagnostics — no errors or warnings.
 - `git diff --check` — passed.
-- Final stale-reference and documentation-consistency scans — passed.
 
-Generated `output/`, `build/`, and `dist/` artifacts were removed after validation.
+## Handoff notes
 
-## Known issues
-
-- None currently known.
-
-## Recommended next step
-
-Use the section-based workflow for resume maintenance and run the documented tests and Ruff checks for future changes.
+- Treat `docs/REFACTOR_EXECUTION_PLAN.md` as the working implementation guide for the phased refactor history.
+- Keep the smoke test in place as the regression guard for later changes.
+- Future work should focus on feature work or additional cleanup only if it has clear ROI.

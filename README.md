@@ -34,13 +34,13 @@ A section-based source is a directory containing `meta.md` and normally a `secti
 
 The canonical section definitions establish section identity, parsing rules, and order. Here, **required** means expected and warning-producing when absent, not fatal:
 
-| Order | File | Requirement | Canonical identity |
-| --- | --- | --- | --- |
-| 1 | `summary.md` | Required | Summary |
-| 2 | `core-skills.md` | Required | Core Skills |
-| 3 | `professional-experience.md` | Required | Professional Experience |
-| 4 | `selected-project.md` | Optional | Selected Project |
-| 5 | `education.md` | Required | Education |
+| Order | File                         | Requirement | Canonical identity      |
+| ----- | ---------------------------- | ----------- | ----------------------- |
+| 1     | `summary.md`                 | Required    | Summary                 |
+| 2     | `core-skills.md`             | Required    | Core Skills             |
+| 3     | `professional-experience.md` | Required    | Professional Experience |
+| 4     | `selected-project.md`        | Optional    | Selected Project        |
+| 5     | `education.md`               | Required    | Education               |
 
 Each present section file must begin with YAML frontmatter containing a non-empty `title`. This title is presentation-only: it controls the visible heading in the generated DOCX but does not change section identity, order, or parsing. For example, changing `title: Summary` to `title: Professional Profile` changes the displayed heading while `summary.md` is still parsed as the canonical Summary section.
 
@@ -78,8 +78,6 @@ CLI path resolution follows these rules:
 - Source files are not supported; the input must be a section-based source directory.
 - A relative output path always resolves under `output/`.
 - An absolute output path is used as provided.
-
-
 
 ## Package structure
 
