@@ -12,7 +12,7 @@ Frontend Architecture • Application Architecture • API Integration • State
 
 ## **Quality & Delivery**
 
-GitHub • GitHub Actions • Jenkins • CI/CD • Testing • Release Automation
+GitHub • CI/CD • Testing • Release Automation • SonarQube
 
 ## **Developer Experience**
 
@@ -20,7 +20,7 @@ GitHub Actions • Azure DevOps • Jenkins • Nx • Vite • XcodeGen • Dev
 
 ## **Collaboration**
 
-Developer Experience • Technical Leadership • Cross-functional Collaboration • Mentoring • Technical Documentation
+Technical Leadership • Cross-functional Collaboration • Mentoring • Technical Documentation
 
 ## **Other**
 

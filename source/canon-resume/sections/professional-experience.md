@@ -14,7 +14,7 @@ Co-creating Alfred with a backend engineer. The product helps people capture ide
 - Standardised project configuration and build tooling to improve consistency, maintainability and repeatable development workflows.
 - Used AI-assisted development as part of a structured engineering workflow, combining code generation with architectural review, testing and manual verification before changes were accepted.
 
-**Tech:** Swift • SwiftUI • Swift Concurrency • REST APIs • Firebase • XCTest • XcodeGen
+Tech: Swift • SwiftUI • Swift Concurrency • REST APIs • Firebase • XCTest • XcodeGen
 
 ---
 
@@ -34,7 +34,7 @@ One recurring request from users was creating new vessel lists. We turned that i
 - Led the frontend implementation of the new workflow, covering API integration, shared state and user interaction.
 - Built features across operational dashboards while working with large datasets and map-based interfaces.
 
-**Tech:** React • TypeScript • MobX • OpenLayers • REST APIs
+Tech: React • TypeScript • MobX • OpenLayers • REST APIs
 
 ---
 
@@ -48,7 +48,7 @@ Led frontend delivery, workflow improvements, onboarding initiatives, and modern
 - Helped shape frontend modernization initiatives through roadmap planning, architecture discussions, platform tooling improvements, and delivery coordination across multiple teams.
 - Reduced operational friction and improved deployment reliability by standardising development practices, strengthening onboarding flows, and simplifying frontend maintenance.
 
-**Tech:** React • TypeScript • Redux • GitHub Actions • Jenkins • SonarQube
+Tech: React • TypeScript • Redux • GitHub Actions • Jenkins • SonarQube
 
 ---
 
@@ -64,7 +64,7 @@ Whenever I noticed engineers or content teams repeatedly solving the same proble
 - Created onboarding guides, architecture documentation and dependency maps that helped people understand large projects more quickly.
 - Supported the team through mentoring, code reviews and production troubleshooting.
 
-**Tech:** React • JavaScript • Node.js • Redux • GitHub REST API • Jenkins • Jira REST API
+Tech: React • JavaScript • Node.js • Redux • GitHub REST API • Jenkins • Jira REST API
 
 ---
 
@@ -77,11 +77,11 @@ Worked on customer-facing promotional products while gradually becoming more inv
 - Developed a reusable Node.js wrapper around the GitHub Enterprise REST API that reduced deployment operations from minutes to seconds by avoiding repository cloning.
 - Continued developing React applications while improving the tooling around them.
 
-**Tech:** React • JavaScript • Redux • Sass • Node.js
+Tech: React • JavaScript • Redux • Sass • Node.js
 
 ---
 
-## **Co-founder & Frontend Developer | UNBOX Learning Experience | Curitiba, Brazil | 2009 – 2017**
+## **Co-founder & Frontend Developer | UNBOX | Brazil | 2009 – 2017**
 
 Co-developed browser-based e-learning platforms and interactive educational products for client projects, focusing on frontend development, user experience, and collaborative delivery.
 
@@ -90,4 +90,4 @@ Co-developed browser-based e-learning platforms and interactive educational prod
 - Managed and customised Moodle-based learning environments across multiple client projects.
 - Worked across frontend implementation, client collaboration, deployment coordination, and product customisation within collaborative delivery teams.
 
-**Tech:** JavaScript • HTML • CSS • ActionScript • Moodle
+Tech: JavaScript • HTML • CSS • ActionScript • Moodle
