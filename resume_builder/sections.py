@@ -27,8 +27,7 @@ class ResumeSource:
     @property
     def content(self) -> str:
         return "\n\n".join(
-            f"# {section.title}\n\n{section.content}"
-            for section in self.sections
+            f"# {section.title}\n\n{section.content}" for section in self.sections
         )
 
 
@@ -49,7 +48,9 @@ def _ordered_section_definitions(metadata: dict) -> tuple[SectionDefinition, ...
             "Front matter field 'sections' is required to be a non-empty list of section kinds"
         )
 
-    definitions_by_kind = {definition.kind: definition for definition in SECTION_DEFINITIONS}
+    definitions_by_kind = {
+        definition.kind: definition for definition in SECTION_DEFINITIONS
+    }
     ordered_definitions: list[SectionDefinition] = []
     seen_kinds: set[str] = set()
 
@@ -70,7 +71,9 @@ def _ordered_section_definitions(metadata: dict) -> tuple[SectionDefinition, ...
             )
         definition = definitions_by_kind.get(kind)
         if definition is None:
-            raise ValueError(f"No canonical section definition exists for kind: {item!r}")
+            raise ValueError(
+                f"No canonical section definition exists for kind: {item!r}"
+            )
         ordered_definitions.append(definition)
         seen_kinds.add(kind)
 

@@ -60,7 +60,7 @@ def render_professional_experience_section(
             document,
             entry.heading_left,
             entry.date_right,
-            entry.description,
+            entry.descriptions,
             entry.bullets,
             entry.tech,
             theme,
@@ -77,7 +77,7 @@ def render_selected_project_section(
         document,
         content.selected_project.heading_left,
         content.selected_project.date_right,
-        content.selected_project.description,
+        content.selected_project.descriptions,
         content.selected_project.bullets,
         content.selected_project.tech,
         theme,
@@ -89,7 +89,9 @@ def render_education_section(
 ) -> None:
     add_section_heading(document, content.section_titles.education, theme)
     for item in content.education:
-        add_education_entry(document, item.heading_left, item.date_right, item.school, theme)
+        add_education_entry(
+            document, item.heading_left, item.date_right, item.school, theme
+        )
 
 
 SECTION_RENDERERS: dict[
@@ -144,16 +146,18 @@ def build_markdown_from_source(source_path: Path) -> str:
         "contact_lines:",
     ]
     lines.extend(f"  - {line}" for line in contact_lines)
-    lines.extend([
-        "---",
-        "",
-        f"# {name}",
-        "",
-        f"**{title}**",
-        "",
-        tagline,
-        "",
-    ])
+    lines.extend(
+        [
+            "---",
+            "",
+            f"# {name}",
+            "",
+            f"**{title}**",
+            "",
+            tagline,
+            "",
+        ]
+    )
     lines.extend(contact_lines)
     lines.append("")
 

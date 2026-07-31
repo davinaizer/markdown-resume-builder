@@ -30,7 +30,7 @@ class SkillLine:
 class EntryBlock:
     heading_left: str
     date_right: str
-    description: str
+    descriptions: tuple[str, ...]
     bullets: tuple[str, ...]
     tech: str
 

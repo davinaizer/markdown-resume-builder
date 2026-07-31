@@ -29,7 +29,9 @@ def resolve_output_path(value: str | Path) -> Path:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build a resume DOCX or Markdown file from Markdown sources.")
+    parser = argparse.ArgumentParser(
+        description="Build a resume DOCX or Markdown file from Markdown sources."
+    )
     parser.add_argument("input_path", nargs="?", default=str(DEFAULT_SOURCE))
     parser.add_argument("-o", "--output", default=str(DEFAULT_OUTPUT))
     args = parser.parse_args()

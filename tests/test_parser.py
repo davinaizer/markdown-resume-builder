@@ -13,8 +13,8 @@ from docx.oxml.ns import qn
 from frontmatter.default_handlers import YAMLHandler
 
 from resume_builder.cli import resolve_output_path, resolve_source_path
-from resume_builder.docx_utils import add_entry_heading
-from resume_builder.parser import parse_resume_source
+from resume_builder.docx_utils import add_entry_heading, add_role_entry
+from resume_builder.parser import parse_experience_lines, parse_resume_source
 from resume_builder.renderer import build_doc_from_source, build_markdown_from_source
 from resume_builder.sections import SECTION_DEFINITIONS, load_resume_directory
 
@@ -65,9 +65,67 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         paragraph = document.paragraphs[0]
 
         self.assertEqual(len(document.tables), 0)
-        self.assertEqual(paragraph.text, "A long role title\t11/2024\N{NO-BREAK SPACE}–\N{NO-BREAK SPACE}11/2025")
+        self.assertEqual(
+            paragraph.text,
+            "A long role title\t11/2024\N{NO-BREAK SPACE}–\N{NO-BREAK SPACE}11/2025",
+        )
         tabs = paragraph._p.pPr.find(qn("w:tabs"))
         self.assertEqual(tabs[0].get(qn("w:val")), "right")
+
+    def test_role_entries_preserve_and_render_every_introductory_paragraph(
+        self,
+    ) -> None:
+        lines = [
+            "## Role | Company | 2024 – Present",
+            "",
+            "First paragraph.",
+            "",
+            "Second paragraph.",
+            "",
+            "Third paragraph.",
+            "",
+            "- Result.",
+            "",
+            "Tech: Python",
+        ]
+
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            entries = parse_experience_lines(lines)
+
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertEqual(
+            entries[0].descriptions,
+            ("First paragraph.", "Second paragraph.", "Third paragraph."),
+        )
+
+        document = load_docx_document()
+        add_role_entry(
+            document,
+            entries[0].heading_left,
+            entries[0].date_right,
+            entries[0].descriptions,
+            entries[0].bullets,
+            entries[0].tech,
+        )
+        rendered_text = [paragraph.text for paragraph in document.paragraphs]
+        for description in entries[0].descriptions:
+            self.assertIn(description, rendered_text)
+
+    def test_role_entry_without_an_introduction_warns_but_still_parses(self) -> None:
+        lines = [
+            "## Role | Company | 2024 – Present",
+            "",
+            "- Result.",
+        ]
+
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            entries = parse_experience_lines(lines)
+
+        self.assertEqual(entries[0].descriptions, ())
+        self.assertEqual(entries[0].bullets, ("Result.",))
+        self.assertIn("Warning:", stderr.getvalue())
 
     def test_canonical_source_builds_a_readable_docx_smoke_test(self) -> None:
         titles = read_section_titles(RESUME_SOURCE)
@@ -186,9 +244,18 @@ class ResumeDirectoryParserTests(unittest.TestCase):
                 titles["professional_experience"].upper(),
             ],
         )
-        self.assertLess(markdown.index(f"# {titles['education']}"), markdown.index(f"# {titles['summary']}"))
-        self.assertLess(markdown.index(f"# {titles['summary']}"), markdown.index(f"# {titles['core_skills']}"))
-        self.assertLess(markdown.index(f"# {titles['core_skills']}"), markdown.index(f"# {titles['professional_experience']}"))
+        self.assertLess(
+            markdown.index(f"# {titles['education']}"),
+            markdown.index(f"# {titles['summary']}"),
+        )
+        self.assertLess(
+            markdown.index(f"# {titles['summary']}"),
+            markdown.index(f"# {titles['core_skills']}"),
+        )
+        self.assertLess(
+            markdown.index(f"# {titles['core_skills']}"),
+            markdown.index(f"# {titles['professional_experience']}"),
+        )
         self.assertEqual(content.section_titles.education, titles["education"])
 
     def test_section_files_require_frontmatter(self) -> None:
@@ -435,10 +502,19 @@ Tech: Python
         self.assertIn("**Senior Frontend Engineer**", markdown)
         self.assertIn("# Professional Profile", markdown)
         self.assertIn("# Selected Work", markdown)
-        self.assertLess(markdown.index("# Professional Profile"), markdown.index("# Core Skills"))
-        self.assertLess(markdown.index("# Core Skills"), markdown.index("# Professional Experience"))
-        self.assertLess(markdown.index("# Professional Experience"), markdown.index("# Selected Work"))
-        self.assertLess(markdown.index("# Selected Work"), markdown.index("# Education"))
+        self.assertLess(
+            markdown.index("# Professional Profile"), markdown.index("# Core Skills")
+        )
+        self.assertLess(
+            markdown.index("# Core Skills"), markdown.index("# Professional Experience")
+        )
+        self.assertLess(
+            markdown.index("# Professional Experience"),
+            markdown.index("# Selected Work"),
+        )
+        self.assertLess(
+            markdown.index("# Selected Work"), markdown.index("# Education")
+        )
 
     def test_editable_title_is_passed_to_model_and_renderer_without_changing_section_type(
         self,

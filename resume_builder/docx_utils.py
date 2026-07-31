@@ -295,27 +295,31 @@ def add_role_entry(
     document: DocumentType,
     heading_left: str,
     date_right: str,
-    description: str,
+    descriptions: Sequence[str],
     bullets: Sequence[str],
     tech: str,
     theme: ResumeTheme = DEFAULT_THEME,
 ) -> None:
     add_entry_heading(document, heading_left, date_right, theme)
 
-    desc = document.add_paragraph(style="Normal")
-    r = desc.add_run(description)
-    set_font(r, theme, size=theme.body_size, color=hex_color(theme.primary_text_color))
-    tail_after = (
-        theme.role_tech_after
-        if not bullets and not tech.strip()
-        else theme.role_description_after
-    )
-    set_paragraph_spacing(
-        desc,
-        before=theme.role_description_before,
-        after=tail_after,
-        line_spacing=theme.role_description_line_spacing,
-    )
+    for idx, description in enumerate(descriptions):
+        desc = document.add_paragraph(style="Normal")
+        r = desc.add_run(description)
+        set_font(
+            r, theme, size=theme.body_size, color=hex_color(theme.primary_text_color)
+        )
+        is_last_description = idx == len(descriptions) - 1
+        tail_after = (
+            theme.role_tech_after
+            if is_last_description and not bullets and not tech.strip()
+            else theme.role_description_after
+        )
+        set_paragraph_spacing(
+            desc,
+            before=theme.role_description_before if idx == 0 else 0,
+            after=tail_after,
+            line_spacing=theme.role_description_line_spacing,
+        )
 
     for bullet in bullets:
         p = document.add_paragraph(style="List Bullet")
