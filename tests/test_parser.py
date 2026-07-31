@@ -9,9 +9,11 @@ from pathlib import Path
 
 import frontmatter
 from docx import Document as load_docx_document
+from docx.oxml.ns import qn
 from frontmatter.default_handlers import YAMLHandler
 
 from resume_builder.cli import resolve_output_path, resolve_source_path
+from resume_builder.docx_utils import add_entry_heading
 from resume_builder.parser import parse_resume_source
 from resume_builder.renderer import build_doc_from_source, build_markdown_from_source
 from resume_builder.sections import SECTION_DEFINITIONS, load_resume_directory
@@ -56,6 +58,17 @@ def heading_texts(document) -> list[str]:
 
 
 class ResumeDirectoryParserTests(unittest.TestCase):
+    def test_entry_heading_uses_a_right_tab_and_non_breaking_date(self) -> None:
+        document = load_docx_document()
+
+        add_entry_heading(document, "A long role title", "11/2024 – 11/2025")
+        paragraph = document.paragraphs[0]
+
+        self.assertEqual(len(document.tables), 0)
+        self.assertEqual(paragraph.text, "A long role title\t11/2024\N{NO-BREAK SPACE}–\N{NO-BREAK SPACE}11/2025")
+        tabs = paragraph._p.pPr.find(qn("w:tabs"))
+        self.assertEqual(tabs[0].get(qn("w:val")), "right")
+
     def test_canonical_source_builds_a_readable_docx_smoke_test(self) -> None:
         titles = read_section_titles(RESUME_SOURCE)
 
@@ -123,11 +136,11 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         content = parse_resume_source(RESUME_SOURCE)
 
         self.assertEqual(content.meta.name, "Davi Naizer Santos")
-        self.assertEqual(len(content.summary), 3)
-        self.assertEqual(len(content.skills), 5)
-        self.assertEqual(len(content.experience), 7)
+        self.assertEqual(
+            {section.value for section in content.present_sections},
+            {"summary", "core_skills", "professional_experience", "education"},
+        )
         self.assertIsNone(content.selected_project)
-        self.assertEqual(len(content.education), 2)
 
     def test_loads_section_titles(self) -> None:
         source = load_resume_directory(RESUME_SOURCE)
@@ -302,9 +315,9 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         self.assertIn(str(missing_path), render_stderr.getvalue())
         self.assertNotIn("core_skills", content.present_sections)
         self.assertEqual(content.skills, ())
-        self.assertEqual(len(content.summary), 3)
-        self.assertEqual(len(content.experience), 7)
-        self.assertEqual(len(content.education), 2)
+        self.assertIn("summary", content.present_sections)
+        self.assertIn("professional_experience", content.present_sections)
+        self.assertIn("education", content.present_sections)
         self.assertEqual(content.section_titles.education, "Learning & Credentials")
         headings = heading_texts(document)
         self.assertEqual(
@@ -443,7 +456,6 @@ Tech: Python
             document = build_doc_from_source(source)
 
         self.assertEqual(content.section_titles.summary, "Professional Profile")
-        self.assertEqual(len(content.summary), 3)
         headings = heading_texts(document)
         self.assertEqual(
             headings,

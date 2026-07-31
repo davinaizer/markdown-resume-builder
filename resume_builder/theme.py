@@ -58,8 +58,6 @@ class ResumeTheme:
     margin: float = 0.55
     header_distance: float = 0.35
     footer_distance: float = 0.35
-    role_table_left_width: float = 5.95
-    role_table_right_width: float = 1.45
 
 
 DEFAULT_THEME = ResumeTheme()
