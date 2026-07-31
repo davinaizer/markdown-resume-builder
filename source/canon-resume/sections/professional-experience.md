@@ -2,86 +2,92 @@
 title: Professional Experience
 ---
 
-## **Product Engineer & Co-creator | Alfred — Independent Product Venture | 01/2026 – Present**
+## **Product Engineer & Co-creator | Independent Product Venture | 12/2025 – Present**
 
-Co-creating Alfred with a backend engineer. The product helps people capture ideas for things to do, receive recommendations and turn them into plans. I am responsible for the native iOS application and share responsibility for product and technical direction. It is currently being tested privately through TestFlight.
+Co-creating Alfred with a backend engineer. The product helps people capture ideas, receive recommendations and turn them into practical plans. I'm responsible for the native iOS application, working across product development, application architecture and native iOS implementation while sharing product and technical decisions with the backend developer. The app is currently being tested privately through TestFlight.
 
-- Built the SwiftUI application, including authentication, onboarding, idea capture, recommendations, follow-up questions and event planning.
-- Integrated the app with typed REST APIs and implemented session persistence, push notifications, deep links and refresh flows driven by backend state.
-- Structured the application around repositories, services and view models with injected dependencies, allowing core flows to be tested without a live API or shared global state.
-- Added unit tests covering view models, session handling, data mapping, notification routing and asynchronous refresh and cancellation behaviour.
-- Used XcodeGen and repository-level build, test and lint checks to keep project configuration and verification repeatable.
-- Used structured AI-assisted workflows for implementation and refactoring, reviewing generated code and verifying it through the same build, test and lint checks before merging changes.
+- Built the native iOS application from the ground up, delivering onboarding, authentication, recommendations and planning workflows.
+- Designed a layered architecture using MVVM-style presentation, repositories, use cases and dependency injection to keep business logic decoupled, testable and maintainable.
+- Integrated backend services for authentication, real-time updates, deep linking and application state while maintaining clear boundaries between networking, domain logic and presentation.
+- Built reusable, accessible UI components with consistent theming and Dynamic Type support, making the interface easier to maintain and evolve.
+- Added automated tests across presentation, domain and infrastructure layers, focusing on business logic and application behaviour rather than UI interactions alone.
+- Standardised project configuration and build tooling to improve consistency, maintainability and repeatable development workflows.
+- Used AI-assisted development as part of a structured engineering workflow, combining code generation with architectural review, testing and manual verification before changes were accepted.
 
-Tech: Swift, SwiftUI, REST APIs, Firebase, SignalR, XcodeGen, XCTest
+Tech: Swift • SwiftUI • Swift Concurrency • REST APIs • Firebase • XCTest • XcodeGen
 
 ---
 
-## **Planned Career Break | 11/2024 – 12/2025**
+## **Planned Career Break | 11/2024 – 11/2025**
 
-Took a planned break from full-time employment to focus on recovery and reconsider what I wanted from the next stage of my career. Returned to regular hands-on development in January 2026 through Alfred, which gave me a practical and collaborative way to resume hands-on product development while working on a product from its early stages.
+Took a planned break from full-time employment after relocating permanently to the UK. During that time I focused on recovery, re-evaluated the direction I wanted my career to take and returned to hands-on product development by building Alfred, a native SwiftUI application.
 
 ---
 
 ## **Senior Frontend Software Engineer | The Signal Group | London, UK | 12/2023 – 10/2024**
 
-Worked on Signal Ocean, a maritime intelligence platform used by brokers, operators and analysts to monitor vessel activity and support commercial decision-making.
+Worked on Signal Ocean, a maritime intelligence platform used by brokers, operators, and analysts.
 
-- Converted a recurring request for new vessel lists into a self-service workflow that users could manage themselves.
+One recurring request from users was creating new vessel lists. We turned that into a self-service workflow so users could manage it themselves instead of depending on the engineering team.
+
 - Worked with backend engineers on a metadata-driven approach that made vessel list configuration reusable across different dashboards.
-- Owned the frontend implementation of the vessel list workflows, including API integration, shared state and interactive map experiences.
-- Developed features across vessel monitoring, analytics and operational dashboards using large datasets and map-based interfaces.
+- Led the frontend implementation of the new workflow, covering API integration, shared state and user interaction.
+- Built features across operational dashboards while working with large datasets and map-based interfaces.
 
-Tech: React, TypeScript, MobX, OpenLayers, Node.js, Azure DevOps, C#, REST APIs
+Tech: React • TypeScript • MobX • OpenLayers • REST APIs
 
 ---
 
 ## **Frontend Tech Lead | Bally’s Interactive | London, UK | 11/2022 – 11/2023**
 
-My role gradually became less about building individual features and more about helping the team improve how they worked, from onboarding and shared tooling to release processes.
+Led frontend delivery, workflow improvements, onboarding initiatives, and modernization efforts across multiple product teams, collaborating closely with architects, backend engineers, and frontend developers to improve delivery quality and engineering effectiveness.
 
-- Designed and implemented GitHub Actions workflows and SonarQube quality gates across 29 frontend repositories, including Pull Request validation and automated code review decoration, reducing manual work and making releases more consistent.
-- Worked with architects, backend engineers and frontend teams to improve tooling shared across React projects.
-- Created architecture diagrams, dependency maps and onboarding guides that reduced reliance on knowledge held by individual engineers.
-- Contributed to technical roadmaps and frontend improvements while balancing longer-term maintenance with ongoing product delivery.
+- Introduced Pull Request automation together with SonarQube and GitHub Actions as part of a broader effort to make code reviews and quality checks more consistent.
+- Coordinated cross-functional frontend initiatives involving React, Svelte, and shared platform tooling across multiple teams and delivery streams.
+- Led onboarding and documentation modernization efforts, creating dependency maps, architectural diagrams, and structured guidance that improved developer self-sufficiency and reduced reliance on tribal knowledge.
+- Helped shape frontend modernization initiatives through roadmap planning, architecture discussions, platform tooling improvements, and delivery coordination across multiple teams.
+- Reduced operational friction and improved deployment reliability by standardising development practices, strengthening onboarding flows, and simplifying frontend maintenance.
 
-Tech: React, TypeScript, Svelte, Redux, Nx, GitHub Actions, Jenkins, WebDriverIO, Cypress, OpenStack
+Tech: React • TypeScript • Redux • GitHub Actions • Jenkins • SonarQube
 
 ---
 
 ## **Senior Frontend Engineer | Gamesys / Bally’s Interactive | London, UK | 10/2020 – 11/2022**
 
-Worked on customer-facing products and the internal tools that supported them, with a growing focus on reducing manual work and making everyday engineering tasks easier.
+I spent much of this role building the tools that sat behind the product rather than the product itself.
 
-- Identified a bottleneck in the promotional content workflow and built a Node.js tool around the Jira REST API that reduced turnaround time from two to three days to around 15 minutes.
-- Updated legacy internal tooling by redesigning data contracts and integrating with the GitHub REST API to improve content preview and testing.
-- Built internal tools and deployment workflows that removed repetitive work for engineering and content teams.
-- Created onboarding resources, architecture diagrams and dependency maps that reduced onboarding time and helped engineers understand complex projects more quickly.
-- Supported the team through mentoring, code reviews, production troubleshooting and day-to-day technical collaboration.
+Whenever I noticed engineers or content teams repeatedly solving the same problem, I tried to automate it.
 
-Tech: React, JavaScript, Node.js, Redux, Svelte, Webpack, GitHub Actions, Jenkins, REST APIs
+- Built a Node.js tool around the Jira REST API that reduced a promotional content workflow from two or three days to around fifteen minutes.
+- Developed reusable tooling around the GitHub Enterprise REST API that removed the need to clone repositories for deployment-related tasks.
+- Built internal tools that simplified content generation, deployment, and day-to-day engineering workflows.
+- Created onboarding guides, architecture documentation and dependency maps that helped people understand large projects more quickly.
+- Supported the team through mentoring, code reviews and production troubleshooting.
+
+Tech: React • JavaScript • Node.js • Redux • GitHub REST API • Jenkins • Jira REST API
 
 ---
 
 ## **Frontend Developer | Gamesys | London, UK | 03/2019 – 09/2020**
 
-Built frontend features and internal tools for promotional platforms used by multiple gaming brands, supporting both customer-facing products and the teams behind them.
+Worked on customer-facing promotional products while gradually becoming more involved in the tooling used by the engineering team.
 
-- Developed a reusable Sass-based design system that improved consistency across promotional interfaces and made new content easier to deliver.
-- Implemented internal tooling that gave teams better visibility into deployments and made problems easier to investigate.
-- Built a reusable Node.js wrapper around the GitHub REST API that removed the need to clone repositories and reduced deployment processing time from minutes to seconds.
-- Developed React and Redux applications while supporting shared tooling and deployment workflows across the content-delivery systems.
+- Built reusable frontend components and styling foundations that improved consistency across promotional interfaces.
+- Built internal tooling that made deployments easier to understand and investigate.
+- Developed a reusable Node.js wrapper around the GitHub Enterprise REST API that reduced deployment operations from minutes to seconds by avoiding repository cloning.
+- Continued developing React applications while improving the tooling around them.
 
-Tech: React, JavaScript, Redux, Sass, Webpack, Gulp, Jenkins
+Tech: React • JavaScript • Redux • Sass • Node.js
 
 ---
 
-## **Co-founder & Frontend Developer | UNBOX Learning Experience | Curitiba, Brazil | 2009 – 2017**
+## **Co-founder & Frontend Developer | UNBOX | Brazil | 2009 – 2017**
 
-Co-founded a small software company that built browser-based learning platforms and interactive educational products for corporate clients.
+Co-developed browser-based e-learning platforms and interactive educational products for client projects, focusing on frontend development, user experience, and collaborative delivery.
 
-- Designed and maintained learning platforms, game-based experiences and interactive educational content using JavaScript, HTML, CSS and ActionScript.
-- Managed and customised Moodle-based learning environments for different client requirements.
-- Worked directly with clients to understand their needs, adapt the products and support delivery across multiple projects.
+- Built and maintained browser-based learning platforms and interactive educational experiences using JavaScript, HTML, CSS, and ActionScript.
+- Developed frontend interfaces and custom LMS functionality supporting content delivery, interactive learning workflows, and user engagement.
+- Managed and customised Moodle-based learning environments across multiple client projects.
+- Worked across frontend implementation, client collaboration, deployment coordination, and product customisation within collaborative delivery teams.
 
-Tech: JavaScript, HTML, CSS, Sass, ActionScript, Moodle LMS, AWS EC2, Linux
+Tech: JavaScript • HTML • CSS • ActionScript • Moodle

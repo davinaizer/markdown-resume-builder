@@ -30,7 +30,7 @@ class SkillLine:
 class EntryBlock:
     heading_left: str
     date_right: str
-    description: str
+    descriptions: tuple[str, ...]
     bullets: tuple[str, ...]
     tech: str
 
@@ -61,3 +61,4 @@ class ResumeContent:
     education: tuple[EducationBlock, ...]
     section_titles: SectionTitles
     present_sections: frozenset[SectionKind]
+    section_order: tuple[SectionKind, ...]

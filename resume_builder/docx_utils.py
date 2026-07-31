@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from docx.document import Document as DocumentType
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING, WD_TAB_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
@@ -128,73 +128,40 @@ def clear_document(document: DocumentType) -> None:
             body.remove(child)
 
 
-def set_table_fixed_width(table, widths: Sequence[Inches]) -> None:
-    table.autofit = False
-    tbl_pr = table._tbl.tblPr
-    tbl_layout = tbl_pr.find(qn("w:tblLayout"))
-    if tbl_layout is None:
-        tbl_layout = OxmlElement("w:tblLayout")
-        tbl_pr.append(tbl_layout)
-    tbl_layout.set(qn("w:type"), "fixed")
-    grid = table._tbl.tblGrid
-    for idx, width in enumerate(widths):
-        if idx < len(grid.gridCol_lst):
-            grid.gridCol_lst[idx].set(qn("w:w"), str(int(width.inches * 1440)))
-    for row in table.rows:
-        for idx, cell in enumerate(row.cells):
-            cell.width = widths[idx]
-            tc_pr = cell._tc.get_or_add_tcPr()
-            tc_w = tc_pr.find(qn("w:tcW"))
-            if tc_w is None:
-                tc_w = OxmlElement("w:tcW")
-                tc_pr.append(tc_w)
-            tc_w.set(qn("w:type"), "dxa")
-            tc_w.set(qn("w:w"), str(int(widths[idx].inches * 1440)))
-
-
-def remove_table_borders(table) -> None:
-    tbl_pr = table._tbl.tblPr
-    borders = tbl_pr.first_child_found_in("w:tblBorders")
-    if borders is None:
-        borders = OxmlElement("w:tblBorders")
-        tbl_pr.append(borders)
-    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
-        el = borders.find(qn(f"w:{edge}"))
-        if el is None:
-            el = OxmlElement(f"w:{edge}")
-            borders.append(el)
-        el.set(qn("w:val"), "nil")
-
-
-def set_cell_margins(cell, *, top=80, start=80, bottom=80, end=80) -> None:
-    tc_pr = cell._tc.get_or_add_tcPr()
-    tc_mar = tc_pr.first_child_found_in("w:tcMar")
-    if tc_mar is None:
-        tc_mar = OxmlElement("w:tcMar")
-        tc_pr.append(tc_mar)
-    for name, val in (("top", top), ("start", start), ("bottom", bottom), ("end", end)):
-        node = tc_mar.find(qn(f"w:{name}"))
-        if node is None:
-            node = OxmlElement(f"w:{name}")
-            tc_mar.append(node)
-        node.set(qn("w:w"), str(val))
-        node.set(qn("w:type"), "dxa")
-
-
-def create_two_column_entry_cells(
-    document: DocumentType, theme: ResumeTheme = DEFAULT_THEME
-):
-    table = document.add_table(rows=1, cols=2)
-    set_table_fixed_width(
-        table,
-        [Inches(theme.role_table_left_width), Inches(theme.role_table_right_width)],
+def add_entry_heading(
+    document: DocumentType,
+    heading: str,
+    date: str,
+    theme: ResumeTheme = DEFAULT_THEME,
+    *,
+    style_name: str = "Heading 2",
+) -> None:
+    paragraph = document.add_paragraph(style=style_name)
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    paragraph.paragraph_format.space_before = Pt(0)
+    paragraph.paragraph_format.space_after = Pt(0)
+    paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+    paragraph.paragraph_format.tab_stops.add_tab_stop(
+        Inches(theme.page_width - (2 * theme.margin)),
+        WD_TAB_ALIGNMENT.RIGHT,
     )
-    remove_table_borders(table)
 
-    left, right = table.rows[0].cells
-    set_cell_margins(left, top=0, start=0, bottom=0, end=0)
-    set_cell_margins(right, top=0, start=0, bottom=0, end=0)
-    return left, right
+    heading_run = paragraph.add_run(heading)
+    set_font(
+        heading_run,
+        theme,
+        size=theme.role_heading_size,
+        bold=True,
+        color=hex_color(theme.primary_text_color),
+    )
+    paragraph.add_run("\t")
+    date_run = paragraph.add_run(date.replace(" ", "\N{NO-BREAK SPACE}"))
+    set_font(
+        date_run,
+        theme,
+        size=theme.date_size,
+        color=hex_color(theme.primary_text_color),
+    )
 
 
 def add_section_heading(
@@ -328,53 +295,31 @@ def add_role_entry(
     document: DocumentType,
     heading_left: str,
     date_right: str,
-    description: str,
+    descriptions: Sequence[str],
     bullets: Sequence[str],
     tech: str,
     theme: ResumeTheme = DEFAULT_THEME,
 ) -> None:
-    left, right = create_two_column_entry_cells(document, theme)
+    add_entry_heading(document, heading_left, date_right, theme)
 
-    p_left = left.paragraphs[0]
-    p_left.style = "Heading 2"
-    p_left.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    p_left.paragraph_format.space_before = Pt(0)
-    p_left.paragraph_format.space_after = Pt(0)
-    p_left.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
-    r_left = p_left.add_run(heading_left)
-    set_font(
-        r_left,
-        theme,
-        size=theme.role_heading_size,
-        bold=True,
-        color=hex_color(theme.primary_text_color),
-    )
-
-    p_right = right.paragraphs[0]
-    p_right.style = "Normal"
-    p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    p_right.paragraph_format.space_before = Pt(0)
-    p_right.paragraph_format.space_after = Pt(0)
-    p_right.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
-    r_right = p_right.add_run(date_right)
-    set_font(
-        r_right, theme, size=theme.date_size, color=hex_color(theme.primary_text_color)
-    )
-
-    desc = document.add_paragraph(style="Normal")
-    r = desc.add_run(description)
-    set_font(r, theme, size=theme.body_size, color=hex_color(theme.primary_text_color))
-    tail_after = (
-        theme.role_tech_after
-        if not bullets and not tech.strip()
-        else theme.role_description_after
-    )
-    set_paragraph_spacing(
-        desc,
-        before=theme.role_description_before,
-        after=tail_after,
-        line_spacing=theme.role_description_line_spacing,
-    )
+    for idx, description in enumerate(descriptions):
+        desc = document.add_paragraph(style="Normal")
+        r = desc.add_run(description)
+        set_font(
+            r, theme, size=theme.body_size, color=hex_color(theme.primary_text_color)
+        )
+        is_last_description = idx == len(descriptions) - 1
+        tail_after = (
+            theme.role_tech_after
+            if is_last_description and not bullets and not tech.strip()
+            else theme.role_description_after
+        )
+        set_paragraph_spacing(
+            desc,
+            before=theme.role_description_before if idx == 0 else 0,
+            after=tail_after,
+            line_spacing=theme.role_description_line_spacing,
+        )
 
     for bullet in bullets:
         p = document.add_paragraph(style="List Bullet")
@@ -416,29 +361,13 @@ def add_education_entry(
     school: str,
     theme: ResumeTheme = DEFAULT_THEME,
 ) -> None:
-    left, right = create_two_column_entry_cells(document, theme)
-
-    p_left = left.paragraphs[0]
-    p_left.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    r_left = p_left.add_run(heading_left)
-    set_font(
-        r_left,
+    add_entry_heading(
+        document,
+        heading_left,
+        date_right,
         theme,
-        size=theme.role_heading_size,
-        bold=True,
-        color=hex_color(theme.primary_text_color),
+        style_name="Normal",
     )
-    p_left.paragraph_format.space_after = Pt(0)
-    p_left.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
-
-    p_right = right.paragraphs[0]
-    p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    r_right = p_right.add_run(date_right)
-    set_font(
-        r_right, theme, size=theme.date_size, color=hex_color(theme.primary_text_color)
-    )
-    p_right.paragraph_format.space_after = Pt(0)
-    p_right.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
 
     p_school = document.add_paragraph(style="Normal")
     r_school = p_school.add_run(school)

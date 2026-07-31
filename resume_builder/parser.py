@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -65,15 +66,31 @@ def take_paragraph(lines: list[str], start: int) -> tuple[str, int]:
     line, idx = next_content_line(lines, start)
     if line is None:
         raise ValueError("Expected paragraph content")
-    return clean_md_text(line), idx + 1
+    paragraph_lines = [clean_md_text(line)]
+    i = idx + 1
+    while i < len(lines):
+        continuation = lines[i].strip()
+        if (
+            not continuation
+            or is_rule(continuation)
+            or is_h1(continuation)
+            or is_h2(continuation)
+            or is_bullet(continuation)
+            or continuation.startswith("Tech:")
+        ):
+            break
+        paragraph_lines.append(clean_md_text(continuation))
+        i += 1
+    return " ".join(paragraph_lines), i
 
 
 def parse_role_like_entry(lines: list[str], start: int) -> tuple[EntryBlock, int]:
     heading = clean_md_text(lines[start].strip())
     heading_left, date_right = split_heading_date(heading)
-    description, i = take_paragraph(lines, start + 1)
+    descriptions: list[str] = []
     bullets: list[str] = []
     tech = ""
+    i = start + 1
     while i < len(lines):
         peek = lines[i].strip()
         if not peek:
@@ -89,12 +106,18 @@ def parse_role_like_entry(lines: list[str], start: int) -> tuple[EntryBlock, int
             tech = clean_md_text(peek)[5:].strip()
             i += 1
             break
-        i += 1
+        description, i = take_paragraph(lines, i)
+        descriptions.append(description)
+    if not descriptions:
+        print(
+            f"Warning: Entry {heading_left!r} has no introductory paragraph",
+            file=sys.stderr,
+        )
     return (
         EntryBlock(
             heading_left=heading_left,
             date_right=date_right,
-            description=description,
+            descriptions=tuple(descriptions),
             bullets=tuple(bullets),
             tech=tech,
         ),
@@ -211,7 +234,9 @@ def _parse_professional_experience_section(
     parsed.experience = parse_experience_lines(section.content.splitlines())
 
 
-def _parse_selected_project_section(section: LoadedSection, parsed: ParsedSections) -> None:
+def _parse_selected_project_section(
+    section: LoadedSection, parsed: ParsedSections
+) -> None:
     parsed.selected_project = parse_selected_project_lines(section.content.splitlines())
 
 
@@ -264,6 +289,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
     titles_by_kind = {section.kind: section.title for section in source.sections}
     section_titles = SectionTitles(**titles_by_kind)
     present_sections = frozenset(section.kind for section in source.sections)
+    section_order = tuple(section.kind for section in source.sections)
     name = _require_string(metadata, "name")
     title = _require_string(metadata, "title")
     tagline = _require_string(metadata, "tagline")
@@ -287,6 +313,7 @@ def parse_resume_source(path: Path) -> ResumeContent:
         ),
         section_titles=section_titles,
         present_sections=present_sections,
+        section_order=section_order,
         summary=parsed.summary,
         skills=parsed.skills,
         experience=parsed.experience,

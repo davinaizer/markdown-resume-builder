@@ -9,11 +9,13 @@ from pathlib import Path
 
 import frontmatter
 from docx import Document as load_docx_document
+from docx.oxml.ns import qn
 from frontmatter.default_handlers import YAMLHandler
 
 from resume_builder.cli import resolve_output_path, resolve_source_path
-from resume_builder.parser import parse_resume_source
-from resume_builder.renderer import build_doc_from_source
+from resume_builder.docx_utils import add_entry_heading, add_role_entry
+from resume_builder.parser import parse_experience_lines, parse_resume_source
+from resume_builder.renderer import build_doc_from_source, build_markdown_from_source
 from resume_builder.sections import SECTION_DEFINITIONS, load_resume_directory
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -56,6 +58,75 @@ def heading_texts(document) -> list[str]:
 
 
 class ResumeDirectoryParserTests(unittest.TestCase):
+    def test_entry_heading_uses_a_right_tab_and_non_breaking_date(self) -> None:
+        document = load_docx_document()
+
+        add_entry_heading(document, "A long role title", "11/2024 – 11/2025")
+        paragraph = document.paragraphs[0]
+
+        self.assertEqual(len(document.tables), 0)
+        self.assertEqual(
+            paragraph.text,
+            "A long role title\t11/2024\N{NO-BREAK SPACE}–\N{NO-BREAK SPACE}11/2025",
+        )
+        tabs = paragraph._p.pPr.find(qn("w:tabs"))
+        self.assertEqual(tabs[0].get(qn("w:val")), "right")
+
+    def test_role_entries_preserve_and_render_every_introductory_paragraph(
+        self,
+    ) -> None:
+        lines = [
+            "## Role | Company | 2024 – Present",
+            "",
+            "First paragraph.",
+            "",
+            "Second paragraph.",
+            "",
+            "Third paragraph.",
+            "",
+            "- Result.",
+            "",
+            "Tech: Python",
+        ]
+
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            entries = parse_experience_lines(lines)
+
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertEqual(
+            entries[0].descriptions,
+            ("First paragraph.", "Second paragraph.", "Third paragraph."),
+        )
+
+        document = load_docx_document()
+        add_role_entry(
+            document,
+            entries[0].heading_left,
+            entries[0].date_right,
+            entries[0].descriptions,
+            entries[0].bullets,
+            entries[0].tech,
+        )
+        rendered_text = [paragraph.text for paragraph in document.paragraphs]
+        for description in entries[0].descriptions:
+            self.assertIn(description, rendered_text)
+
+    def test_role_entry_without_an_introduction_warns_but_still_parses(self) -> None:
+        lines = [
+            "## Role | Company | 2024 – Present",
+            "",
+            "- Result.",
+        ]
+
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            entries = parse_experience_lines(lines)
+
+        self.assertEqual(entries[0].descriptions, ())
+        self.assertEqual(entries[0].bullets, ("Result.",))
+        self.assertIn("Warning:", stderr.getvalue())
+
     def test_canonical_source_builds_a_readable_docx_smoke_test(self) -> None:
         titles = read_section_titles(RESUME_SOURCE)
 
@@ -123,11 +194,11 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         content = parse_resume_source(RESUME_SOURCE)
 
         self.assertEqual(content.meta.name, "Davi Naizer Santos")
-        self.assertEqual(len(content.summary), 3)
-        self.assertEqual(len(content.skills), 5)
-        self.assertEqual(len(content.experience), 7)
+        self.assertEqual(
+            {section.value for section in content.present_sections},
+            {"summary", "core_skills", "professional_experience", "education"},
+        )
         self.assertIsNone(content.selected_project)
-        self.assertEqual(len(content.education), 2)
 
     def test_loads_section_titles(self) -> None:
         source = load_resume_directory(RESUME_SOURCE)
@@ -142,6 +213,50 @@ class ResumeDirectoryParserTests(unittest.TestCase):
                 ("education", titles["education"]),
             ],
         )
+
+    def test_meta_section_order_controls_rendering_order(self) -> None:
+        titles = read_section_titles(RESUME_SOURCE)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = copy_resume_source(temp_dir)
+            meta_path = source / "meta.md"
+            meta_markdown = meta_path.read_text(encoding="utf-8").replace(
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - education\n",
+                "sections:\n  - education\n  - summary\n  - core_skills\n  - professional_experience\n",
+                1,
+            )
+            meta_path.write_text(meta_markdown, encoding="utf-8")
+
+            loaded_source = load_resume_directory(source)
+            content = parse_resume_source(source)
+            document = build_doc_from_source(source)
+            markdown = build_markdown_from_source(source)
+
+        self.assertEqual(
+            [section.kind for section in loaded_source.sections],
+            ["education", "summary", "core_skills", "professional_experience"],
+        )
+        self.assertEqual(
+            heading_texts(document),
+            [
+                titles["education"].upper(),
+                titles["summary"].upper(),
+                titles["core_skills"].upper(),
+                titles["professional_experience"].upper(),
+            ],
+        )
+        self.assertLess(
+            markdown.index(f"# {titles['education']}"),
+            markdown.index(f"# {titles['summary']}"),
+        )
+        self.assertLess(
+            markdown.index(f"# {titles['summary']}"),
+            markdown.index(f"# {titles['core_skills']}"),
+        )
+        self.assertLess(
+            markdown.index(f"# {titles['core_skills']}"),
+            markdown.index(f"# {titles['professional_experience']}"),
+        )
+        self.assertEqual(content.section_titles.education, titles["education"])
 
     def test_section_files_require_frontmatter(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -267,9 +382,9 @@ class ResumeDirectoryParserTests(unittest.TestCase):
         self.assertIn(str(missing_path), render_stderr.getvalue())
         self.assertNotIn("core_skills", content.present_sections)
         self.assertEqual(content.skills, ())
-        self.assertEqual(len(content.summary), 3)
-        self.assertEqual(len(content.experience), 7)
-        self.assertEqual(len(content.education), 2)
+        self.assertIn("summary", content.present_sections)
+        self.assertIn("professional_experience", content.present_sections)
+        self.assertIn("education", content.present_sections)
         self.assertEqual(content.section_titles.education, "Learning & Credentials")
         headings = heading_texts(document)
         self.assertEqual(
@@ -318,6 +433,13 @@ Tech: Python
 """
         with tempfile.TemporaryDirectory() as temp_dir:
             source = copy_resume_source(temp_dir)
+            meta_path = source / "meta.md"
+            meta_markdown = meta_path.read_text(encoding="utf-8").replace(
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - education\n",
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - selected_project\n  - education\n",
+                1,
+            )
+            meta_path.write_text(meta_markdown, encoding="utf-8")
             (source / "sections" / "selected-project.md").write_text(
                 markdown, encoding="utf-8"
             )
@@ -351,6 +473,49 @@ Tech: Python
             ],
         )
 
+    def test_build_markdown_combines_sections_in_order_with_editable_titles(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = copy_resume_source(temp_dir)
+            meta_path = source / "meta.md"
+            meta_markdown = meta_path.read_text(encoding="utf-8").replace(
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - education\n",
+                "sections:\n  - summary\n  - core_skills\n  - professional_experience\n  - selected_project\n  - education\n",
+                1,
+            )
+            meta_path.write_text(meta_markdown, encoding="utf-8")
+            summary_path_copy = source / "sections" / "summary.md"
+            summary_markdown = summary_path_copy.read_text(encoding="utf-8").replace(
+                "title: About", "title: Professional Profile", 1
+            )
+            summary_path_copy.write_text(summary_markdown, encoding="utf-8")
+            selected_project_path = source / "sections" / "selected-project.md"
+            selected_project_path.write_text(
+                "---\ntitle: Selected Work\n---\n\n## Project | 2026\n\nDescription.\n\n- Result.\n\nTech: Python\n",
+                encoding="utf-8",
+            )
+
+            markdown = build_markdown_from_source(source)
+
+        self.assertIn("# Davi Naizer Santos", markdown)
+        self.assertIn("**Senior Frontend Engineer**", markdown)
+        self.assertIn("# Professional Profile", markdown)
+        self.assertIn("# Selected Work", markdown)
+        self.assertLess(
+            markdown.index("# Professional Profile"), markdown.index("# Core Skills")
+        )
+        self.assertLess(
+            markdown.index("# Core Skills"), markdown.index("# Professional Experience")
+        )
+        self.assertLess(
+            markdown.index("# Professional Experience"),
+            markdown.index("# Selected Work"),
+        )
+        self.assertLess(
+            markdown.index("# Selected Work"), markdown.index("# Education")
+        )
+
     def test_editable_title_is_passed_to_model_and_renderer_without_changing_section_type(
         self,
     ) -> None:
@@ -367,7 +532,6 @@ Tech: Python
             document = build_doc_from_source(source)
 
         self.assertEqual(content.section_titles.summary, "Professional Profile")
-        self.assertEqual(len(content.summary), 3)
         headings = heading_texts(document)
         self.assertEqual(
             headings,

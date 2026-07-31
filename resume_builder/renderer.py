@@ -24,7 +24,7 @@ from resume_builder.docx_utils import (
 )
 from resume_builder.models import ResumeContent, SectionKind
 from resume_builder.parser import parse_resume_source
-from resume_builder.registry import SECTION_DEFINITIONS
+from resume_builder.sections import load_resume_directory
 from resume_builder.theme import DEFAULT_THEME, ResumeTheme
 
 
@@ -60,7 +60,7 @@ def render_professional_experience_section(
             document,
             entry.heading_left,
             entry.date_right,
-            entry.description,
+            entry.descriptions,
             entry.bullets,
             entry.tech,
             theme,
@@ -77,7 +77,7 @@ def render_selected_project_section(
         document,
         content.selected_project.heading_left,
         content.selected_project.date_right,
-        content.selected_project.description,
+        content.selected_project.descriptions,
         content.selected_project.bullets,
         content.selected_project.tech,
         theme,
@@ -89,7 +89,9 @@ def render_education_section(
 ) -> None:
     add_section_heading(document, content.section_titles.education, theme)
     for item in content.education:
-        add_education_entry(document, item.heading_left, item.date_right, item.school, theme)
+        add_education_entry(
+            document, item.heading_left, item.date_right, item.school, theme
+        )
 
 
 SECTION_RENDERERS: dict[
@@ -101,6 +103,68 @@ SECTION_RENDERERS: dict[
     SectionKind.SELECTED_PROJECT: render_selected_project_section,
     SectionKind.EDUCATION: render_education_section,
 }
+
+
+def _require_string(metadata: dict, key: str) -> str:
+    value = metadata.get(key)
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(
+            f"Front matter field '{key}' is required and must be a non-empty string"
+        )
+    return value.strip()
+
+
+def _require_string_list(metadata: dict, key: str) -> tuple[str, ...]:
+    value = metadata.get(key)
+    if not isinstance(value, list) or not value:
+        raise ValueError(
+            f"Front matter field '{key}' is required and must be a non-empty list of strings"
+        )
+    cleaned: list[str] = []
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError(
+                f"Front matter field '{key}' must contain only non-empty strings"
+            )
+        cleaned.append(item.strip())
+    return tuple(cleaned)
+
+
+def build_markdown_from_source(source_path: Path) -> str:
+    source = load_resume_directory(source_path)
+    metadata = source.metadata
+    name = _require_string(metadata, "name")
+    title = _require_string(metadata, "title")
+    tagline = _require_string(metadata, "tagline")
+    contact_lines = _require_string_list(metadata, "contact_lines")
+
+    lines: list[str] = [
+        "---",
+        f"name: {name}",
+        f"title: {title}",
+        f"tagline: {tagline}",
+        "contact_lines:",
+    ]
+    lines.extend(f"  - {line}" for line in contact_lines)
+    lines.extend(
+        [
+            "---",
+            "",
+            f"# {name}",
+            "",
+            f"**{title}**",
+            "",
+            tagline,
+            "",
+        ]
+    )
+    lines.extend(contact_lines)
+    lines.append("")
+
+    for section in source.sections:
+        lines.extend((f"# {section.title}", "", section.content, ""))
+
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def build_doc_from_source(
@@ -215,11 +279,9 @@ def build_doc_from_source(
 
     add_title_block(doc, content.meta, theme)
 
-    for definition in SECTION_DEFINITIONS:
-        if definition.kind not in content.present_sections:
-            continue
-        renderer = SECTION_RENDERERS.get(definition.kind)
-        if renderer is not None:
+    for section_kind in content.section_order:
+        renderer = SECTION_RENDERERS.get(section_kind)
+        if renderer is not None and section_kind in content.present_sections:
             renderer(doc, content, theme)
 
     return doc
