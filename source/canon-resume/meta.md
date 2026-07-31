@@ -1,9 +1,9 @@
 ---
-createdAt: 2026-05-15
-updatedAt: 2026-07-29
+createdAt: 2026-05-31
+updatedAt: 2026-07-31
 name: Davi Naizer Santos
 title: Senior Frontend Engineer
-tagline: Product Engineering | Reliability & Developer Experience
+tagline: React • Typescript • Swift | Product Engineering
 contact_lines:
   - Hove, United Kingdom
   - davi.naizer@gmail.com | linkedin.com/in/davi-naizer

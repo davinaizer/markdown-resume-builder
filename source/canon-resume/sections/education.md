@@ -2,7 +2,7 @@
 title: Education
 ---
 
-## **Computer Engineering | 2005 – 2010**
+## **Computer Engineering (incomplete) | 2005 – 2010**
 
 Positivo University, Brazil
 

@@ -2,8 +2,10 @@
 title: About
 ---
 
-Senior frontend and product engineer with experience building customer-facing applications, internal tools and the engineering workflows behind them. Most of my commercial work has used React, TypeScript and JavaScript, with more recent hands-on product development in Swift and SwiftUI.
+Senior frontend engineer with experience building customer-facing applications, internal tools and the engineering systems behind them. Most of my commercial experience has been with React, TypeScript, and JavaScript, while more recently I've been building a native iOS application using Swift and SwiftUI.
 
-I have spent much of my career in product teams, turning recurring problems such as manual workflows, inconsistent releases and difficult onboarding into maintainable tools and shared practices. I have worked across frontend delivery, API integration, testing, CI/CD and developer tooling, usually in close collaboration with product, design and backend engineers.
+I've spent much of my career in product teams, building features while also improving the way software gets built. I enjoy understanding how people work, spotting where unnecessary complexity comes from, and simplifying those workflows through better tooling, automation and maintainable software.
 
-I prefer understanding the problem before selecting the technology, favouring practical solutions that are reliable, maintainable and easy for other engineers to work with.
+Over time I realised I was spending as much time improving the way teams worked as I was building product features. That naturally led me towards developer tooling, workflow automation, engineering practices and, more recently, native iOS product development.
+
+I naturally gravitate towards work that makes other people's jobs easier. Sometimes that's delivering a feature, other times it's improving a workflow, automating a repetitive task or building tools that help a team work more effectively. I'm generally more interested in understanding the problem than chasing the latest framework.
