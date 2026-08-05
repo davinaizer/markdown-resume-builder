@@ -47,6 +47,7 @@ Led frontend delivery, workflow improvements, onboarding initiatives, and modern
 - Led onboarding and documentation modernization efforts, creating dependency maps, architectural diagrams, and structured guidance that improved developer self-sufficiency and reduced reliance on tribal knowledge.
 - Helped shape frontend modernization initiatives through roadmap planning, architecture discussions, platform tooling improvements, and delivery coordination across multiple teams.
 - Reduced operational friction and improved deployment reliability by standardising development practices, strengthening onboarding flows, and simplifying frontend maintenance.
+- Led a Storybook initiative to improve component documentation and support a more consistent frontend development workflow.
 
 Tech: React • TypeScript • Redux • GitHub Actions • Jenkins • SonarQube
 
@@ -64,7 +65,7 @@ Whenever I noticed engineers or content teams repeatedly solving the same proble
 - Created onboarding guides, architecture documentation and dependency maps that helped people understand large projects more quickly.
 - Supported the team through mentoring, code reviews and production troubleshooting.
 
-Tech: React • JavaScript • Node.js • Redux • GitHub REST API • Jenkins • Jira REST API
+Tech: React • JavaScript • Styled-components • Node.js • Redux • GitHub REST API • Jenkins • Jira REST API
 
 ---
 
