@@ -4,7 +4,7 @@ title: Professional Experience
 
 ## **Product Engineer & Co-creator | Independent Product Venture | 12/2025 – Present**
 
-Co-creating Alfred with a backend engineer. The product helps people capture ideas, receive recommendations and turn them into practical plans. I lead development of the native iOS application, sharing responsibility for product direction, application architecture and technical decisions while collaborating closely on backend integration and overall product development. The application has progressed beyond its initial MVP and is currently undergoing private TestFlight validation.
+Co-creating Alfred with a backend engineer. The product helps people capture ideas, receive recommendations and turn them into practical plans. I lead development of the native iOS application, sharing responsibility for product direction, application architecture and technical decisions while collaborating closely on backend integration and overall product development. The application is currently undergoing private TestFlight validation ahead of its first public release.
 
 - Led development of the native iOS application from the ground up, delivering the first end-to-end product experience covering onboarding, authentication, recommendations and planning workflows, now undergoing private TestFlight validation.
 - Designed the application's layered architecture using MVVM-style presentation, repositories, use cases and dependency injection to keep business logic decoupled, testable and maintainable.
@@ -15,7 +15,7 @@ Co-creating Alfred with a backend engineer. The product helps people capture ide
 - Standardised project configuration, build tooling and repository workflows using XcodeGen and automated verification to improve consistency and maintainability.
 - Established an AI-assisted engineering workflow that combines code generation with architectural review, testing and manual verification before changes are accepted.
 
-Tech: Swift • SwiftUI • REST APIs • Firebase • XCTest • XcodeGen
+**Tech:** Swift • SwiftUI • REST APIs • Firebase • XCTest • XcodeGen
 
 ---
 
@@ -29,7 +29,7 @@ Took a planned break from full-time employment after relocating permanently to t
 
 Worked on Signal Ocean, a maritime intelligence platform used by brokers, operators and analysts to monitor global shipping activity. As part of a cross-functional product team, I contributed to the Vessel List area, collaborating with Product, Design, Backend and QA to deliver features within a large React and TypeScript monorepo. One recurring challenge was that creating reusable Vessel List templates required support requests and manual engineering work. We redesigned that workflow into a self-service experience that allowed company administrators to create and manage templates independently.
 
-- Owned the frontend implementation of the Template Admin experience, taking the feature through implementation, testing and production release.
+- Owned the frontend implementation of the Template Admin experience, taking the feature through implementation, testing, fixes and production release.
 - Implemented role-based template management for a multi-company SaaS platform, separating administrator management capabilities from end-user template consumption.
 - Built data-intensive configuration workflows using AG Grid, covering validation, permissions, interaction states and reusable editing behaviours.
 - Worked closely with backend engineers on metadata-driven APIs and shared application state to support reusable template configuration across multiple dashboards.
@@ -40,7 +40,7 @@ Worked on Signal Ocean, a maritime intelligence platform used by brokers, operat
 
 ---
 
-## Frontend Tech Lead | Bally's Interactive | London, UK | 11/2022 – 11/2023
+## **Frontend Tech Lead | Bally's Interactive | London, UK | 11/2022 – 11/2023**
 
 Provided technical direction across frontend engineering initiatives focused on code quality, developer experience, onboarding and platform modernization. Collaborated with Product, Technical Architects and engineering teams to improve delivery practices, frontend architecture and engineering standards across multiple products.
 
@@ -56,30 +56,29 @@ Provided technical direction across frontend engineering initiatives focused on 
 
 ## **Senior Frontend Engineer | Gamesys / Bally’s Interactive | London, UK | 10/2020 – 11/2022**
 
-I spent much of this role building the tools that sat behind the product rather than the product itself.
+Worked across customer-facing products and internal engineering tooling, increasingly focusing on developer experience, workflow automation and frontend platform improvements.
 
-Whenever I noticed engineers or content teams repeatedly solving the same problem, I tried to automate it.
-
-- Built a Node.js tool around the Jira REST API that reduced a promotional content workflow from two or three days to around fifteen minutes.
+- Built a Node.js tool around the Jira REST API that reduced a promotional content workflow from days to minutes.
 - Developed reusable tooling around the GitHub Enterprise REST API that removed the need to clone repositories for deployment-related tasks.
-- Built internal tools that simplified content generation, deployment, and day-to-day engineering workflows.
-- Created onboarding guides, architecture documentation and dependency maps that helped people understand large projects more quickly.
+- Built internal tooling supporting Offer Builder, promotional content generation, deployment and day-to-day engineering workflows.
+- Created onboarding guides, architecture documentation and dependency maps that helped engineers understand large projects more quickly.
 - Supported the team through mentoring, code reviews and production troubleshooting.
 
-Tech: React • JavaScript • Styled-components • Node.js • Redux • GitHub REST API • Jenkins • Jira REST API
+**Tech:** React • JavaScript • Styled-components • Node.js • Redux • GitHub REST API • Jenkins • Jira REST API
 
 ---
 
 ## **Frontend Developer | Gamesys | London, UK | 03/2019 – 09/2020**
 
-Worked on customer-facing promotional products while gradually becoming more involved in the tooling used by the engineering team.
+Joined the Promotions team building customer-facing promotional experiences before expanding into frontend architecture, developer tooling and cross-team enablement.
 
+- Led the technical improvement initiative for Landing Pages, defining the proposed frontend architecture, documenting the roadmap and presenting the approach to engineering, QA, design and business stakeholders.
 - Built reusable frontend components and styling foundations that improved consistency across promotional interfaces.
-- Built internal tooling that made deployments easier to understand and investigate.
-- Developed a reusable Node.js wrapper around the GitHub Enterprise REST API that reduced deployment operations from minutes to seconds by avoiding repository cloning.
-- Continued developing React applications while improving the tooling around them.
+- Developed GitHub API-based deployment tooling that simplified deployment workflows and reduced reliance on repository cloning.
+- Mentored developers, designers and stakeholders through code reviews, frontend debugging, Git support and technical documentation.
+- Contributed to customer-facing React applications while helping improve internal engineering tooling and workflows.
 
-Tech: React • JavaScript • Redux • Sass • Node.js
+**Tech:** React • JavaScript • Redux • Sass • Node.js
 
 ---
 
@@ -92,4 +91,4 @@ Co-developed browser-based e-learning platforms and interactive educational prod
 - Managed and customised Moodle-based learning environments across multiple client projects.
 - Worked across frontend implementation, client collaboration, deployment coordination, and product customisation within collaborative delivery teams.
 
-Tech: JavaScript • HTML • CSS • ActionScript • Moodle
+**Tech:** JavaScript • HTML • CSS • ActionScript • Moodle

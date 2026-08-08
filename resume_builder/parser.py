@@ -76,7 +76,7 @@ def take_paragraph(lines: list[str], start: int) -> tuple[str, int]:
             or is_h1(continuation)
             or is_h2(continuation)
             or is_bullet(continuation)
-            or continuation.startswith("Tech:")
+            or continuation.startswith("**Tech:**")
         ):
             break
         paragraph_lines.append(clean_md_text(continuation))
@@ -102,7 +102,7 @@ def parse_role_like_entry(lines: list[str], start: int) -> tuple[EntryBlock, int
             bullets.append(clean_md_text(peek[2:]))
             i += 1
             continue
-        if peek.startswith("Tech:"):
+        if peek.startswith("**Tech:**"):
             tech = clean_md_text(peek)[5:].strip()
             i += 1
             break

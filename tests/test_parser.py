@@ -86,7 +86,7 @@ class ResumeDirectoryParserTests(unittest.TestCase):
             "",
             "- Result.",
             "",
-            "Tech: Python",
+            "**Tech:** Python",
         ]
 
         stderr = io.StringIO()
@@ -429,7 +429,7 @@ Description.
 
 - Result.
 
-Tech: Python
+**Tech:** Python
 """
         with tempfile.TemporaryDirectory() as temp_dir:
             source = copy_resume_source(temp_dir)
