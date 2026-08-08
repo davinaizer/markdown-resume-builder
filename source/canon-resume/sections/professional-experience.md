@@ -82,13 +82,13 @@ Joined the Promotions team building customer-facing promotional experiences befo
 
 ---
 
-## **Co-founder & Frontend Developer | UNBOX | Brazil | 2009 – 2017**
+## **Co-founder & Technical Lead | UNBOX Learning Experience | Brazil | 2009 – 2017**
 
-Co-developed browser-based e-learning platforms and interactive educational products for client projects, focusing on frontend development, user experience, and collaborative delivery.
+Co-founded a digital learning company developing e-learning platforms, Learning Management Systems (LMS) and interactive educational products for enterprise clients including Volvo Brasil, Grupo Boticário, MetLife and HSBC. Worked across product discovery, solution design, technical leadership, frontend development, client delivery and business operations while coordinating a multidisciplinary team of designers and developers.
 
-- Built and maintained browser-based learning platforms and interactive educational experiences using JavaScript, HTML, CSS, and ActionScript.
-- Developed frontend interfaces and custom LMS functionality supporting content delivery, interactive learning workflows, and user engagement.
-- Managed and customised Moodle-based learning environments across multiple client projects.
-- Worked across frontend implementation, client collaboration, deployment coordination, and product customisation within collaborative delivery teams.
+- Collaborated directly with clients, designers and instructional specialists to translate business and learning requirements into practical software solutions.
+- Led the technical delivery of client projects, coordinating a team of up to five developers while remaining hands-on with architecture, frontend development and implementation.
+- Reduced e-learning delivery time from around three months to four weeks by developing a reusable framework and improving the end-to-end delivery process across discovery, instructional design, UX, development and quality assurance.
+- Built browser-based learning platforms, interactive educational products and custom Learning Management System (LMS) functionality for enterprise projects.
 
 **Tech:** JavaScript • HTML • CSS • ActionScript • Moodle
