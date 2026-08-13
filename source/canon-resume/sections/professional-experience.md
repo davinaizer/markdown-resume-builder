@@ -36,7 +36,7 @@ Worked on Signal Ocean, a maritime intelligence platform used by brokers, operat
 - Developed React and TypeScript features across the Vessel List area and the shared UI component library within a large frontend monorepo.
 - Onboarded a frontend engineer to the monorepo, Vessel List architecture and Azure-based development environment.
 
-**Tech:** React • TypeScript • MobX • OpenLayers • AG Grid • REST APIs • Azure
+**Tech:** React • TypeScript • MobX • OpenLayers • AG Grid • C# • .NET • Azure DevOps • REST APIs
 
 ---
 
