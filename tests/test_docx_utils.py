@@ -6,6 +6,7 @@ from contextlib import redirect_stderr
 
 from docx import Document as load_docx_document
 from docx.oxml.ns import qn
+from docx.shared import Inches
 
 from resume_builder.docx_utils import (
     add_entry_heading,
@@ -13,6 +14,7 @@ from resume_builder.docx_utils import (
     add_role_entry,
 )
 from resume_builder.parser import parse_experience_lines
+from resume_builder.theme import ResumeTheme
 
 
 class DocxUtilsTests(unittest.TestCase):
@@ -77,9 +79,10 @@ class DocxUtilsTests(unittest.TestCase):
             self.assertIn(description, rendered_text)
 
     def test_nested_role_entry_is_indented_and_ordered_after_parent(self) -> None:
+        theme = ResumeTheme(nested_role_left_indent=0.3)
         document = load_docx_document()
         add_role_entry(
-            document, "Company | London", "2020 – 2024", ("Parent.",), (), ""
+            document, "Company | London", "2020 – 2024", ("Parent.",), (), "", theme
         )
         add_nested_role_entry(
             document,
@@ -88,6 +91,7 @@ class DocxUtilsTests(unittest.TestCase):
             ("Role one.", "Role two."),
             ("Delivered.",),
             "Python",
+            theme,
         )
 
         paragraphs = document.paragraphs
@@ -104,4 +108,7 @@ class DocxUtilsTests(unittest.TestCase):
             texts[nested_heading_index + 1 : nested_heading_index + 5], nested_content
         )
         nested_heading = paragraphs[nested_heading_index]
-        self.assertGreater(nested_heading.paragraph_format.left_indent.pt, 0)
+        self.assertEqual(
+            nested_heading.paragraph_format.left_indent,
+            Inches(theme.nested_role_left_indent),
+        )

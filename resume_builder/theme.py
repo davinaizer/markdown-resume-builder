@@ -50,6 +50,7 @@ class ResumeTheme:
     single_line_spacing: float = 1.0
     list_bullet_left_indent: float = 0.22
     list_bullet_first_line_indent: float = -0.18
+    nested_role_left_indent: float = 0.18
 
     section_border_size: str = "4"
 

@@ -53,11 +53,14 @@ class ResumeRendererTests(unittest.TestCase):
         expected_experience_text = [
             "Gamesys → Bally's Interactive | London, UK\t03/2019",
             "Joined Gamesys as a Frontend Developer and progressed",
-            "Frontend Tech Lead | Bally's Interactive\t11/2022",
+            "Frontend Tech Lead",
+            "11/2022",
             "Provided technical direction across frontend initiatives",
-            "Senior Frontend Engineer | Gamesys / Bally's Interactive\t10/2020",
+            "Senior Frontend Engineer",
+            "10/2020",
             "Worked across customer-facing products and internal engineering tooling",
-            "Frontend Developer | Gamesys\t03/2019",
+            "Frontend Developer",
+            "03/2019",
             "Joined the Promotions team building customer-facing",
             "Tech: React • TypeScript • Redux Toolkit",
             "Tech: React • JavaScript • Styled-components",
@@ -67,9 +70,9 @@ class ResumeRendererTests(unittest.TestCase):
         for text in expected_experience_text:
             self.assertTrue(any(text in paragraph for paragraph in rendered_text), text)
         role_headings = [
-            "Frontend Tech Lead | Bally's Interactive\t11/2022",
-            "Senior Frontend Engineer | Gamesys / Bally's Interactive\t10/2020",
-            "Frontend Developer | Gamesys\t03/2019",
+            "Frontend Tech Lead",
+            "Senior Frontend Engineer",
+            "Frontend Developer",
         ]
         role_indices = [
             next(

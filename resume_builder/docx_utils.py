@@ -382,7 +382,7 @@ def add_nested_role_entry(
         bullets,
         tech,
         theme,
-        left_indent=0.18,
+        left_indent=theme.nested_role_left_indent,
     )
 
 
