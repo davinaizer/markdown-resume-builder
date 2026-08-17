@@ -58,6 +58,22 @@ You can reorder sections by editing this list. If the list is omitted, the build
 
 If a required section file is missing, the builder writes a path-specific warning to standard error, skips that section, and continues. It does not render an empty heading or placeholder. If the entire `sections/` directory is absent, the same rule applies to each required file. If the explicitly optional `selected-project.md` is absent, the section is omitted silently.
 
+## Professional Experience source format
+
+`sections/professional-experience.md` is an interim Markdown adapter for a typed timeline model. Every `##` entry heading must be followed by exactly one type marker (blank lines allowed before it):
+
+```md
+<!-- experience: employment -->
+<!-- experience: project -->
+<!-- experience: career_break -->
+```
+
+The final `|`-separated heading segment is always the display date range. `employment` and `project` entries use `title | organisation [| location] | dates`; a `career_break` uses `title | dates`. Grouped employment uses `organisation [| location] | dates` followed by one or more `###` role headings in the form `title [| organisation] | dates`.
+
+Entries and roles may contain any number of summary paragraphs, bullets, and an optional `**Tech:**` display string. The parent context ends at the first nested role and each role owns its own summary, bullets, and technologies. A career break may have summaries only; it cannot contain roles, bullets, or technologies.
+
+This contract preserves readable Markdown while the type comments remove ambiguity. It is temporary: a future PKM-generated professional-profile projection will import into the same typed experience model.
+
 ## Usage
 
 Install dependencies:

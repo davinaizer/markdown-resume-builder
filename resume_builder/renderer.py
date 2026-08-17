@@ -13,6 +13,8 @@ from docx.styles.style import ParagraphStyle
 from resume_builder.docx_utils import (
     add_body_paragraph,
     add_education_entry,
+    add_entry_heading,
+    add_nested_role_entry,
     add_role_entry,
     add_section_heading,
     add_skill_line,
@@ -22,7 +24,12 @@ from resume_builder.docx_utils import (
     hex_color,
     set_style_font,
 )
-from resume_builder.models import ResumeContent, SectionKind
+from resume_builder.models import (
+    ExperienceEntry,
+    ExperienceType,
+    ResumeContent,
+    SectionKind,
+)
 from resume_builder.parser import parse_resume_source
 from resume_builder.sections import load_resume_directory
 from resume_builder.theme import DEFAULT_THEME, ResumeTheme
@@ -51,20 +58,60 @@ def render_core_skills_section(
         add_skill_line(document, skill.label, skill.value, theme)
 
 
+def experience_heading(entry: ExperienceEntry) -> str:
+    fields = [
+        field for field in (entry.title, entry.organisation, entry.location) if field
+    ]
+    return " | ".join(fields)
+
+
+def role_heading(role_title: str, role_organisation: str | None) -> str:
+    return " | ".join(field for field in (role_title, role_organisation) if field)
+
+
+def render_career_break(
+    document: DocumentType, entry: ExperienceEntry, theme: ResumeTheme
+) -> None:
+    add_entry_heading(document, experience_heading(entry), entry.date_right, theme)
+    for index, description in enumerate(entry.descriptions):
+        add_body_paragraph(
+            document,
+            description,
+            theme,
+            before=theme.role_description_before if index == 0 else 0,
+            after=theme.role_tech_after
+            if index == len(entry.descriptions) - 1
+            else theme.role_description_after,
+        )
+
+
 def render_professional_experience_section(
     document: DocumentType, content: ResumeContent, theme: ResumeTheme = DEFAULT_THEME
 ) -> None:
     add_section_heading(document, content.section_titles.professional_experience, theme)
     for entry in content.experience:
+        if entry.type is ExperienceType.CAREER_BREAK:
+            render_career_break(document, entry, theme)
+            continue
         add_role_entry(
             document,
-            entry.heading_left,
+            experience_heading(entry),
             entry.date_right,
             entry.descriptions,
             entry.bullets,
             entry.tech,
             theme,
         )
+        for role in entry.roles:
+            add_nested_role_entry(
+                document,
+                role_heading(role.title, role.organisation),
+                role.date_right,
+                role.descriptions,
+                role.bullets,
+                role.tech,
+                theme,
+            )
 
 
 def render_selected_project_section(

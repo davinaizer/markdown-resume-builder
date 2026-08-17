@@ -35,6 +35,35 @@ class EntryBlock:
     tech: str
 
 
+class ExperienceType(StrEnum):
+    EMPLOYMENT = "employment"
+    PROJECT = "project"
+    CAREER_BREAK = "career_break"
+
+
+@dataclass(frozen=True, slots=True)
+class ExperienceRole:
+    title: str
+    organisation: str | None
+    date_right: str
+    descriptions: tuple[str, ...]
+    bullets: tuple[str, ...]
+    tech: str
+
+
+@dataclass(frozen=True, slots=True)
+class ExperienceEntry:
+    type: ExperienceType
+    title: str | None
+    organisation: str | None
+    location: str | None
+    date_right: str
+    descriptions: tuple[str, ...]
+    bullets: tuple[str, ...]
+    tech: str
+    roles: tuple[ExperienceRole, ...]
+
+
 @dataclass(frozen=True, slots=True)
 class EducationBlock:
     heading_left: str
@@ -56,7 +85,7 @@ class ResumeContent:
     meta: ResumeMeta
     summary: tuple[str, ...]
     skills: tuple[SkillLine, ...]
-    experience: tuple[EntryBlock, ...]
+    experience: tuple[ExperienceEntry, ...]
     selected_project: EntryBlock | None
     education: tuple[EducationBlock, ...]
     section_titles: SectionTitles

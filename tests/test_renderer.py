@@ -8,8 +8,20 @@ from pathlib import Path
 
 from docx import Document as load_docx_document
 
+from resume_builder.models import (
+    ExperienceEntry,
+    ExperienceType,
+    ResumeContent,
+    ResumeMeta,
+    SectionKind,
+    SectionTitles,
+)
 from resume_builder.parser import parse_resume_source
-from resume_builder.renderer import build_doc_from_source, build_markdown_from_source
+from resume_builder.renderer import (
+    build_doc_from_source,
+    build_markdown_from_source,
+    render_professional_experience_section,
+)
 from resume_builder.sections import SECTION_DEFINITIONS, load_resume_directory
 from tests.helpers import (
     RESUME_SOURCE,
@@ -37,6 +49,57 @@ class ResumeRendererTests(unittest.TestCase):
         self.assertEqual(document.core_properties.title, "Davi Naizer Santos Resume")
         self.assertEqual(document.core_properties.subject, "Resume")
         self.assertEqual(document.core_properties.author, "Davi Naizer Santos")
+        rendered_text = [paragraph.text for paragraph in reloaded.paragraphs]
+        expected_experience_text = [
+            "Gamesys → Bally's Interactive | London, UK\t03/2019",
+            "Joined Gamesys as a Frontend Developer and progressed",
+            "Frontend Tech Lead | Bally's Interactive\t11/2022",
+            "Provided technical direction across frontend initiatives",
+            "Senior Frontend Engineer | Gamesys / Bally's Interactive\t10/2020",
+            "Worked across customer-facing products and internal engineering tooling",
+            "Frontend Developer | Gamesys\t03/2019",
+            "Joined the Promotions team building customer-facing",
+            "Tech: React • TypeScript • Redux Toolkit",
+            "Tech: React • JavaScript • Styled-components",
+            "Planned Career Break",
+            "Took a planned break from full-time employment",
+        ]
+        for text in expected_experience_text:
+            self.assertTrue(any(text in paragraph for paragraph in rendered_text), text)
+        role_headings = [
+            "Frontend Tech Lead | Bally's Interactive\t11/2022",
+            "Senior Frontend Engineer | Gamesys / Bally's Interactive\t10/2020",
+            "Frontend Developer | Gamesys\t03/2019",
+        ]
+        role_indices = [
+            next(
+                index
+                for index, paragraph in enumerate(rendered_text)
+                if heading in paragraph
+            )
+            for heading in role_headings
+        ]
+        self.assertEqual(role_indices, sorted(role_indices))
+        career_break_index = next(
+            index
+            for index, paragraph in enumerate(rendered_text)
+            if paragraph.startswith("Planned Career Break\t")
+        )
+        next_entry_index = next(
+            index
+            for index, paragraph in enumerate(
+                rendered_text[career_break_index + 1 :], career_break_index + 1
+            )
+            if paragraph.startswith(
+                "Senior Frontend Software Engineer | The Signal Group"
+            )
+        )
+        self.assertEqual(
+            rendered_text[career_break_index + 1 : next_entry_index],
+            [
+                "Took a planned break from full-time employment after leaving The Signal Group. During that time I stepped back to re-evaluate my career direction and returned to hands-on product development, which eventually developed into the venture behind Alfred."
+            ],
+        )
         self.assertEqual(
             heading_texts(reloaded),
             [
@@ -45,6 +108,38 @@ class ResumeRendererTests(unittest.TestCase):
                 titles["professional_experience"].upper(),
                 titles["education"].upper(),
             ],
+        )
+
+    def test_renderer_omits_invalid_career_break_bullets_and_technology(self) -> None:
+        entry = ExperienceEntry(
+            type=ExperienceType.CAREER_BREAK,
+            title="Career Break",
+            organisation=None,
+            location=None,
+            date_right="2025",
+            descriptions=("Summary.",),
+            bullets=("Must not render.",),
+            tech="Must not render",
+            roles=(),
+        )
+        content = ResumeContent(
+            meta=ResumeMeta("Name", "Title", "Tagline", ("Contact",)),
+            summary=(),
+            skills=(),
+            experience=(entry,),
+            selected_project=None,
+            education=(),
+            section_titles=SectionTitles(),
+            present_sections=frozenset({SectionKind.PROFESSIONAL_EXPERIENCE}),
+            section_order=(SectionKind.PROFESSIONAL_EXPERIENCE,),
+        )
+        document = load_docx_document()
+
+        render_professional_experience_section(document, content)
+
+        self.assertEqual(
+            [paragraph.text for paragraph in document.paragraphs],
+            ["PROFESSIONAL EXPERIENCE", "Career Break\t2025", "Summary."],
         )
 
     def test_meta_section_order_controls_rendering_order(self) -> None:
@@ -264,8 +359,9 @@ Description.
             )
             meta_path.write_text(meta_markdown, encoding="utf-8")
             summary_path = source / "sections" / "summary.md"
+            summary_title = read_frontmatter_title(summary_path)
             summary_markdown = summary_path.read_text(encoding="utf-8").replace(
-                "title: About", "title: Professional Profile", 1
+                f"title: {summary_title}", "title: Professional Profile", 1
             )
             summary_path.write_text(summary_markdown, encoding="utf-8")
             selected_project_path = source / "sections" / "selected-project.md"

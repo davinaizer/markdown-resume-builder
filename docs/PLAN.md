@@ -76,6 +76,8 @@ Every present section file requires a non-empty frontmatter `title`. The title c
 
 Experience and selected-project entries may contain any number of introductory paragraphs. Every paragraph is preserved in rendered output; an entry without an introduction is non-fatal and produces a warning.
 
+Professional Experience is a typed timeline adapter. Each top-level `##` entry must have exactly one following `<!-- experience: employment|project|career_break -->` marker; blank lines before the marker are allowed. Flat employment and projects use `title | organisation [| location] | dates`; career breaks use `title | dates`; grouped employment uses `organisation [| location] | dates` and contains ordered `###` roles using `title [| organisation] | dates`. Parent and role bodies independently preserve paragraphs, bullets, and an optional `**Tech:**` line. Career breaks allow summaries only. The current Markdown grammar is intentionally temporary: a future PKM professional-profile projection will map into the same typed model.
+
 Missing required files produce path-specific warnings and are skipped without an empty heading. If `sections/` itself is absent, each required path produces the same warning. An absent optional file is omitted silently.
 
 ## Implementation phases
@@ -116,6 +118,11 @@ Missing required files produce path-specific warnings and are skipped without an
 - Removed unsupported entry points, APIs, model defaults, tests, packaging configuration, and documentation.
 - Added Ruff as a development dependency and formatted the Python codebase.
 - Added a regression test enforcing directory-only sources.
+
+### Phase 7 — Typed Professional Experience timeline (complete)
+- Added explicit employment, project, and career-break entries with optional location.
+- Added grouped employment with ordered, independently rendered nested roles.
+- Retained Markdown as the canonical interim adapter, preserving the boundary for a later PKM professional-profile importer.
 
 ## Maintenance guidance
 

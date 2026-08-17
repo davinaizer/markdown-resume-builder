@@ -135,11 +135,13 @@ def add_entry_heading(
     theme: ResumeTheme = DEFAULT_THEME,
     *,
     style_name: str = "Heading 2",
+    left_indent: float = 0,
 ) -> None:
     paragraph = document.add_paragraph(style=style_name)
     paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
     paragraph.paragraph_format.space_before = Pt(0)
     paragraph.paragraph_format.space_after = Pt(0)
+    paragraph.paragraph_format.left_indent = Inches(left_indent)
     paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
     paragraph.paragraph_format.tab_stops.add_tab_stop(
         Inches(theme.page_width - (2 * theme.margin)),
@@ -299,8 +301,12 @@ def add_role_entry(
     bullets: Sequence[str],
     tech: str,
     theme: ResumeTheme = DEFAULT_THEME,
+    *,
+    left_indent: float = 0,
 ) -> None:
-    add_entry_heading(document, heading_left, date_right, theme)
+    add_entry_heading(
+        document, heading_left, date_right, theme, left_indent=left_indent
+    )
 
     for idx, description in enumerate(descriptions):
         desc = document.add_paragraph(style="Normal")
@@ -314,6 +320,7 @@ def add_role_entry(
             if is_last_description and not bullets and not tech.strip()
             else theme.role_description_after
         )
+        desc.paragraph_format.left_indent = Inches(left_indent)
         set_paragraph_spacing(
             desc,
             before=theme.role_description_before if idx == 0 else 0,
@@ -326,6 +333,9 @@ def add_role_entry(
         r = p.add_run(bullet)
         set_font(
             r, theme, size=theme.body_size, color=hex_color(theme.primary_text_color)
+        )
+        p.paragraph_format.left_indent = Inches(
+            theme.list_bullet_left_indent + left_indent
         )
         set_paragraph_spacing(
             p,
@@ -346,12 +356,34 @@ def add_role_entry(
         )
         t2 = tech_p.add_run(f" {tech}")
         set_font(t2, theme, size=theme.tech_value_size, color=hex_color(theme.grey))
+        tech_p.paragraph_format.left_indent = Inches(left_indent)
         set_paragraph_spacing(
             tech_p,
             before=theme.role_tech_before,
             after=theme.role_tech_after,
             line_spacing=theme.single_line_spacing,
         )
+
+
+def add_nested_role_entry(
+    document: DocumentType,
+    heading_left: str,
+    date_right: str,
+    descriptions: Sequence[str],
+    bullets: Sequence[str],
+    tech: str,
+    theme: ResumeTheme = DEFAULT_THEME,
+) -> None:
+    add_role_entry(
+        document,
+        heading_left,
+        date_right,
+        descriptions,
+        bullets,
+        tech,
+        theme,
+        left_indent=0.18,
+    )
 
 
 def add_education_entry(
