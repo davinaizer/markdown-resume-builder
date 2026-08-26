@@ -30,7 +30,14 @@ from resume_builder.models import (
     ResumeContent,
     SectionKind,
 )
-from resume_builder.parser import parse_resume_source
+from resume_builder.parser import parse_experience_lines, parse_resume_source
+from resume_builder.profiles import (
+    OutputProfile,
+    coerce_output_profile,
+    flatten_experience,
+    prepare_content,
+    validate_experience,
+)
 from resume_builder.sections import load_resume_directory
 from resume_builder.theme import DEFAULT_THEME, ResumeTheme
 
@@ -70,9 +77,19 @@ def role_heading(role_title: str, role_organisation: str | None) -> str:
 
 
 def render_career_break(
-    document: DocumentType, entry: ExperienceEntry, theme: ResumeTheme
+    document: DocumentType,
+    entry: ExperienceEntry,
+    theme: ResumeTheme,
+    *,
+    align_date: bool = True,
 ) -> None:
-    add_entry_heading(document, experience_heading(entry), entry.date_right, theme)
+    add_entry_heading(
+        document,
+        experience_heading(entry),
+        entry.date_right,
+        theme,
+        align_date=align_date,
+    )
     for index, description in enumerate(entry.descriptions):
         add_body_paragraph(
             document,
@@ -86,12 +103,21 @@ def render_career_break(
 
 
 def render_professional_experience_section(
-    document: DocumentType, content: ResumeContent, theme: ResumeTheme = DEFAULT_THEME
+    document: DocumentType,
+    content: ResumeContent,
+    theme: ResumeTheme = DEFAULT_THEME,
+    *,
+    profile: OutputProfile | str = OutputProfile.GROUPED,
 ) -> None:
-    add_section_heading(document, content.section_titles.professional_experience, theme)
-    for entry in content.experience:
+    selected_profile = coerce_output_profile(profile)
+    prepared_content = prepare_content(content, selected_profile)
+    align_date = selected_profile is OutputProfile.GROUPED
+    add_section_heading(
+        document, prepared_content.section_titles.professional_experience, theme
+    )
+    for entry in prepared_content.experience:
         if entry.type is ExperienceType.CAREER_BREAK:
-            render_career_break(document, entry, theme)
+            render_career_break(document, entry, theme, align_date=align_date)
             continue
         add_role_entry(
             document,
@@ -101,17 +127,19 @@ def render_professional_experience_section(
             entry.bullets,
             entry.tech,
             theme,
+            align_date=align_date,
         )
-        for role in entry.roles:
-            add_nested_role_entry(
-                document,
-                role_heading(role.title, role.organisation),
-                role.date_right,
-                role.descriptions,
-                role.bullets,
-                role.tech,
-                theme,
-            )
+        if selected_profile is OutputProfile.GROUPED:
+            for role in entry.roles:
+                add_nested_role_entry(
+                    document,
+                    role_heading(role.title, role.organisation),
+                    role.date_right,
+                    role.descriptions,
+                    role.bullets,
+                    role.tech,
+                    theme,
+                )
 
 
 def render_selected_project_section(
@@ -177,7 +205,82 @@ def _require_string_list(metadata: dict, key: str) -> tuple[str, ...]:
     return tuple(cleaned)
 
 
-def build_markdown_from_source(source_path: Path) -> str:
+def _markdown_heading(fields: tuple[str | None, ...]) -> str:
+    return " | ".join(field for field in fields if field)
+
+
+def _append_markdown_content(
+    lines: list[str],
+    descriptions: tuple[str, ...],
+    bullets: tuple[str, ...],
+    tech: str,
+    *,
+    allow_details: bool = True,
+) -> None:
+    for description in descriptions:
+        lines.extend((description, ""))
+    if not allow_details:
+        return
+    lines.extend(f"- {bullet}" for bullet in bullets)
+    if bullets:
+        lines.append("")
+    if tech.strip():
+        lines.extend((f"**Tech:** {tech}", ""))
+
+
+def render_experience_markdown(
+    entries: tuple[ExperienceEntry, ...],
+    *,
+    profile: OutputProfile | str = OutputProfile.ATS,
+) -> str:
+    selected_profile = coerce_output_profile(profile)
+    validate_experience(entries)
+    prepared_entries = (
+        flatten_experience(entries)
+        if selected_profile is OutputProfile.ATS
+        else entries
+    )
+    lines: list[str] = []
+    for index, entry in enumerate(prepared_entries):
+        heading = _markdown_heading(
+            (
+                entry.title,
+                entry.organisation,
+                entry.location,
+                entry.date_right,
+            )
+        )
+        marker = f"<!-- experience: {entry.type.value} -->"
+        lines.extend((f"## **{heading}**", ""))
+        if selected_profile is OutputProfile.GROUPED:
+            lines.extend((marker, ""))
+        _append_markdown_content(
+            lines,
+            entry.descriptions,
+            entry.bullets,
+            entry.tech,
+            allow_details=entry.type is not ExperienceType.CAREER_BREAK,
+        )
+        if selected_profile is OutputProfile.GROUPED:
+            for role in entry.roles:
+                role_heading = _markdown_heading(
+                    (role.title, role.organisation, role.date_right)
+                )
+                lines.extend((f"### **{role_heading}**", ""))
+                _append_markdown_content(
+                    lines, role.descriptions, role.bullets, role.tech
+                )
+        if index < len(prepared_entries) - 1:
+            lines.extend(("---", ""))
+    return "\n".join(lines).rstrip()
+
+
+def build_markdown_from_source(
+    source_path: Path,
+    *,
+    profile: OutputProfile | str = OutputProfile.ATS,
+) -> str:
+    selected_profile = coerce_output_profile(profile)
     source = load_resume_directory(source_path)
     metadata = source.metadata
     name = _require_string(metadata, "name")
@@ -209,14 +312,24 @@ def build_markdown_from_source(source_path: Path) -> str:
     lines.append("")
 
     for section in source.sections:
-        lines.extend((f"# {section.title}", "", section.content, ""))
+        section_content = section.content
+        if section.kind is SectionKind.PROFESSIONAL_EXPERIENCE:
+            entries = parse_experience_lines(section.content.splitlines())
+            section_content = render_experience_markdown(
+                entries, profile=selected_profile
+            )
+        lines.extend((f"# {section.title}", "", section_content, ""))
 
     return "\n".join(lines).rstrip() + "\n"
 
 
 def build_doc_from_source(
-    source_path: Path, theme: ResumeTheme = DEFAULT_THEME
+    source_path: Path,
+    theme: ResumeTheme = DEFAULT_THEME,
+    *,
+    profile: OutputProfile | str = OutputProfile.ATS,
 ) -> DocumentType:
+    selected_profile = coerce_output_profile(profile)
     content = parse_resume_source(source_path)
     doc = Document()
     clear_document(doc)
@@ -328,7 +441,13 @@ def build_doc_from_source(
 
     for section_kind in content.section_order:
         renderer = SECTION_RENDERERS.get(section_kind)
-        if renderer is not None and section_kind in content.present_sections:
+        if renderer is None or section_kind not in content.present_sections:
+            continue
+        if section_kind is SectionKind.PROFESSIONAL_EXPERIENCE:
+            render_professional_experience_section(
+                doc, content, theme, profile=selected_profile
+            )
+        else:
             renderer(doc, content, theme)
 
     return doc

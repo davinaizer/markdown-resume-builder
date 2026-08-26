@@ -17,9 +17,11 @@ from resume_builder.models import (
     SectionTitles,
 )
 from resume_builder.parser import parse_resume_source
+from resume_builder.profiles import OutputProfile
 from resume_builder.renderer import (
     build_doc_from_source,
     build_markdown_from_source,
+    render_experience_markdown,
     render_professional_experience_section,
 )
 from resume_builder.sections import SECTION_DEFINITIONS, load_resume_directory
@@ -40,7 +42,9 @@ class ResumeRendererTests(unittest.TestCase):
             output = Path(temp_dir) / "resume.docx"
             stderr = io.StringIO()
             with redirect_stderr(stderr):
-                document = build_doc_from_source(RESUME_SOURCE)
+                document = build_doc_from_source(
+                    RESUME_SOURCE, profile=OutputProfile.GROUPED
+                )
                 document.save(str(output))
 
             reloaded = load_docx_document(str(output))
@@ -113,6 +117,74 @@ class ResumeRendererTests(unittest.TestCase):
             ],
         )
 
+    def test_ats_profile_flattens_grouped_employment(self) -> None:
+        document = build_doc_from_source(RESUME_SOURCE, profile=OutputProfile.ATS)
+        paragraphs = document.paragraphs
+        headings = [
+            paragraph
+            for paragraph in paragraphs
+            if paragraph.style.name == "Heading 2"
+            and any(
+                title in paragraph.text
+                for title in (
+                    "Frontend Tech Lead",
+                    "Senior Frontend Engineer",
+                    "Frontend Developer",
+                )
+            )
+        ]
+        heading_texts = [paragraph.text for paragraph in headings]
+
+        self.assertEqual(
+            heading_texts,
+            [
+                "Frontend Tech Lead | Bally's Interactive | London, UK | 11/2022\N{NO-BREAK SPACE}–\N{NO-BREAK SPACE}11/2023",
+                "Senior Frontend Engineer | Gamesys / Bally's Interactive | London, UK | 10/2020\N{NO-BREAK SPACE}–\N{NO-BREAK SPACE}11/2022",
+                "Frontend Developer | Gamesys | London, UK | 03/2019\N{NO-BREAK SPACE}–\N{NO-BREAK SPACE}09/2020",
+            ],
+        )
+        self.assertTrue(
+            any(
+                "Joined Gamesys as a Frontend Developer and progressed"
+                in paragraph.text
+                for paragraph in paragraphs
+            )
+        )
+        self.assertTrue(
+            all(paragraph.paragraph_format.left_indent == 0 for paragraph in headings)
+        )
+        self.assertFalse(
+            any("Gamesys → Bally's Interactive" in text for text in heading_texts)
+        )
+
+    def test_ats_markdown_flattens_grouped_employment(self) -> None:
+        markdown = build_markdown_from_source(RESUME_SOURCE, profile=OutputProfile.ATS)
+        experience = markdown.split("# Professional Experience", 1)[1].split(
+            "# Education", 1
+        )[0]
+
+        self.assertIn(
+            "## **Frontend Tech Lead | Bally's Interactive | London, UK | 11/2022 – 11/2023**",
+            experience,
+        )
+        self.assertIn(
+            "## **Senior Frontend Engineer | Gamesys / Bally's Interactive | London, UK | 10/2020 – 11/2022**",
+            experience,
+        )
+        self.assertIn(
+            "## **Frontend Developer | Gamesys | London, UK | 03/2019 – 09/2020**",
+            experience,
+        )
+        self.assertNotIn(
+            "Gamesys → Bally's Interactive | London, UK | 03/2019 – 11/2023", experience
+        )
+        self.assertNotIn("### ", experience)
+        self.assertNotIn("<!-- experience:", experience)
+        self.assertIn(
+            "Joined Gamesys as a Frontend Developer and progressed to Senior Frontend Engineer",
+            experience,
+        )
+
     def test_renderer_omits_invalid_career_break_bullets_and_technology(self) -> None:
         entry = ExperienceEntry(
             type=ExperienceType.CAREER_BREAK,
@@ -144,6 +216,11 @@ class ResumeRendererTests(unittest.TestCase):
             [paragraph.text for paragraph in document.paragraphs],
             ["PROFESSIONAL EXPERIENCE", "Career Break\t2025", "Summary."],
         )
+        for profile in (OutputProfile.ATS, OutputProfile.GROUPED):
+            with self.subTest(profile=profile):
+                markdown = render_experience_markdown((entry,), profile=profile)
+                self.assertIn("Summary.", markdown)
+                self.assertNotIn("Must not render.", markdown)
 
     def test_meta_section_order_controls_rendering_order(self) -> None:
         titles = read_section_titles(RESUME_SOURCE)

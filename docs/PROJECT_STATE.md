@@ -2,11 +2,11 @@
 
 ## Updated
 
-2026-07-30
+2026-08-26
 
 ## Current phase
 
-Refactor planning complete; Phase 5 verification and cleanup is complete.
+Dual presentation profiles are implemented and validated; the default output is ATS-safe while grouped rendering remains available.
 
 ## Status summary
 
@@ -18,13 +18,17 @@ Refactor planning complete; Phase 5 verification and cleanup is complete.
 - Phase 5 completed final validation and a small cleanup pass.
 - The smoke test still covers parse → render → save → reload for `source/canon-resume`.
 - Existing parser/path-resolution tests remain intact.
-- No known issues remain from the phased refactor work.
+- The typed Professional Experience model now supports `ats` and `grouped` output profiles without duplicating canonical source content.
+- The default CLI and direct builders produce ATS output; `--profile grouped` preserves the human-oriented nested-role layout.
+- Profile transformation, DOCX/Markdown rendering, and CLI selection are covered by 39 tests.
+- No known issues remain from the phased refactor or dual-profile work.
 
 ## Validation completed
 
 - `uv run python -m unittest tests.test_parser` — passed with 16 tests.
-- `uv run python -m unittest discover -s tests` — passed with 16 tests.
+- `uv run python -m unittest discover -s tests` — passed with 39 tests.
 - `uv run ruff check .` — passed.
+- `uv run ruff format --check .` — passed.
 - `uv run python -m compileall -q resume_builder tests` — passed.
 - `git diff --check` — passed.
 

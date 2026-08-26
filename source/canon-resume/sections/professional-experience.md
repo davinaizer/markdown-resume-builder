@@ -32,7 +32,7 @@ Took a planned break from full-time employment after leaving The Signal Group. D
 
 Worked on Signal Ocean, a maritime intelligence platform used by brokers, operators and analysts to monitor global shipping activity. As part of a cross-functional product team, I worked on the Vessel List area within a large React and TypeScript monorepo. One recurring challenge was that creating reusable Vessel List templates required support requests and manual engineering work. We redesigned that workflow into a self-service experience that allowed company administrators to create and manage templates directly.
 
-- Owned the frontend implementation of the Template Admin experience, taking the feature through implementation, testing, fixes and production release.
+- Developed the frontend implementation of the Template Admin experience, taking the feature through implementation, testing, fixes and production release.
 - Implemented role-based template management for a multi-company SaaS platform, separating administrator management capabilities from end-user template consumption.
 - Built data-intensive configuration workflows using AG Grid, covering validation, permissions, interaction states and reusable editing behaviours.
 - Worked closely with backend engineers on metadata-driven APIs and shared application state to support reusable template configuration across multiple dashboards.

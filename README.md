@@ -74,6 +74,23 @@ Entries and roles may contain any number of summary paragraphs, bullets, and an 
 
 This contract preserves readable Markdown while the type comments remove ambiguity. It is temporary: a future PKM-generated professional-profile projection will import into the same typed experience model.
 
+## Output profiles
+
+The canonical source and typed model preserve grouped employment relationships. The builder supports two presentation profiles:
+
+- `ats` (default): renders every nested employment role as a standalone record with an explicit title, organisation, location, and date range. This is the recommended profile for job applications.
+- `grouped`: preserves the parent employment entry and visually nested roles. This is useful for human-oriented review and portfolio output.
+
+The profiles are derived from the same source; do not maintain a separate ATS résumé source. For example:
+
+```bash
+uv run build-resume canon-resume -o resume-ats.docx
+uv run build-resume canon-resume -o resume-grouped.docx --profile grouped
+uv run build-resume canon-resume -o resume-ats.md --profile ats
+```
+
+ATS output does not emit the grouped parent-only Gamesys/Bally's heading. Instead, it repeats the relevant organisation and location on each role so application systems can reconstruct independent employment records. The parent progression and acquisition context is retained with the first flattened role.
+
 ## Usage
 
 Install dependencies:
@@ -88,7 +105,7 @@ The primary explicit command is:
 uv run build-resume canon-resume -o resume-test.docx
 ```
 
-It reads `source/canon-resume/` and writes `output/resume-test.docx`.
+It reads `source/canon-resume/` and writes `output/resume-test.docx` using the default `ats` profile. Select `--profile grouped` when the grouped human-oriented presentation is preferred.
 
 To export the full resume as one Markdown file, give the output a `.md` or `.markdown` suffix:
 
@@ -115,6 +132,7 @@ CLI path resolution follows these rules:
 
 - `resume_builder/cli.py`: command-line parsing, path resolution, and orchestration
 - `resume_builder/models.py`: parsed resume data models
+- `resume_builder/profiles.py`: output profiles and derived experience views
 - `resume_builder/parser.py`: section-content parsing
 - `resume_builder/sections.py`: canonical section definitions, discovery, loading, ordering, and missing-file warnings
 - `resume_builder/renderer.py`: DOCX generation

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from resume_builder.profiles import OutputProfile
 from resume_builder.renderer import build_doc_from_source, build_markdown_from_source
 from resume_builder.theme import DEFAULT_THEME
 
@@ -34,7 +35,14 @@ def main() -> None:
     )
     parser.add_argument("input_path", nargs="?", default=str(DEFAULT_SOURCE))
     parser.add_argument("-o", "--output", default=str(DEFAULT_OUTPUT))
+    parser.add_argument(
+        "--profile",
+        choices=[profile.value for profile in OutputProfile],
+        default=OutputProfile.ATS.value,
+        help="Presentation profile to render (default: ats)",
+    )
     args = parser.parse_args()
+    profile = OutputProfile(args.profile)
 
     input_path = resolve_source_path(args.input_path)
     output_docx = resolve_output_path(args.output)
@@ -43,10 +51,10 @@ def main() -> None:
     output_docx.parent.mkdir(parents=True, exist_ok=True)
 
     if suffix in MARKDOWN_SUFFIXES:
-        markdown = build_markdown_from_source(input_path)
+        markdown = build_markdown_from_source(input_path, profile=profile)
         output_docx.write_text(markdown, encoding="utf-8")
     elif suffix == DOCX_SUFFIX:
-        doc = build_doc_from_source(input_path, DEFAULT_THEME)
+        doc = build_doc_from_source(input_path, DEFAULT_THEME, profile=profile)
         doc.save(str(output_docx))
     else:
         raise ValueError(

@@ -9,11 +9,12 @@ This plan follows the project-structure guidance from:
 
 ## Final status
 
-- Phases 0–6 are complete.
+- Phases 0–8 are complete.
 - Resume generation logic lives in the `resume_builder` package.
 - The original monolithic `docs/resume-source.md` was migrated into the canonical section-based source at `source/canon-resume/`; it is no longer a current source path.
 - The repository root contains `README.md` and the operational `AGENTS.md`; planning and handoff documents live under `docs/`; resume sources live under `source/`; generated DOCX files live under ignored `output/`.
 - Editable section titles affect presentation only. `meta.md` controls section ordering; canonical definitions and filenames determine section identity and parsing behavior.
+- The canonical typed experience model supports dual presentation profiles: `ats` is the default flat application output, while `grouped` preserves nested employment for human-oriented output.
 - Missing required section files warn and are skipped. The explicitly optional `selected-project.md` is silently omitted when absent.
 - Only section-based source directories are supported.
 - Ruff provides the project linting and formatting baseline.
@@ -44,6 +45,7 @@ markdown-resume-builder/
     docx_utils.py
     models.py
     parser.py
+    profiles.py
     registry.py
     sections.py
     renderer.py
@@ -56,6 +58,7 @@ markdown-resume-builder/
 - `cli.py`: command-line parsing, path resolution, and orchestration.
 - `models.py`: dataclasses for resume metadata and parsed section content.
 - `parser.py`: section-content parsing.
+- `profiles.py`: output profiles and derived experience views.
 - `registry.py`: canonical section definitions and identities.
 - `sections.py`: source loading, ordering, and missing-file warnings.
 - `renderer.py`: document composition and output rendering.
@@ -79,6 +82,15 @@ Experience and selected-project entries may contain any number of introductory p
 Professional Experience is a typed timeline adapter. Each top-level `##` entry must have exactly one following `<!-- experience: employment|project|career_break -->` marker; blank lines before the marker are allowed. Flat employment and projects use `title | organisation [| location] | dates`; career breaks use `title | dates`; grouped employment uses `organisation [| location] | dates` and contains ordered `###` roles using `title [| organisation] | dates`. Parent and role bodies independently preserve paragraphs, bullets, and an optional `**Tech:**` line. Career breaks allow summaries only. The current Markdown grammar is intentionally temporary: a future PKM professional-profile projection will map into the same typed model.
 
 Missing required files produce path-specific warnings and are skipped without an empty heading. If `sections/` itself is absent, each required path produces the same warning. An absent optional file is omitted silently.
+
+### Output profiles
+
+The canonical source remains grouped where the timeline requires it. Output rendering supports two profiles:
+
+- `ats` is the default and flattens grouped employment into standalone role records with explicit title, organisation, location, and role dates. Parent context is retained with the first flattened role.
+- `grouped` preserves the parent employment entry and nested role presentation for human-oriented output.
+
+Profile-specific transformation belongs between the typed model and the format renderers. It must not duplicate canonical résumé content or weaken the professional-profile model.
 
 ## Implementation phases
 
@@ -123,6 +135,13 @@ Missing required files produce path-specific warnings and are skipped without an
 - Added explicit employment, project, and career-break entries with optional location.
 - Added grouped employment with ordered, independently rendered nested roles.
 - Retained Markdown as the canonical interim adapter, preserving the boundary for a later PKM professional-profile importer.
+
+### Phase 8 — Dual presentation profiles (complete)
+- Added `ats` and `grouped` output profiles without duplicating canonical source content.
+- Added an ATS transformation that flattens grouped roles while preserving parent context.
+- Added profile-aware DOCX and Markdown rendering, including contiguous ATS headings and repeated organisation/location fields.
+- Added CLI profile selection with `ats` as the default.
+- Added transformation and output regression tests and documented the profile contract.
 
 ## Maintenance guidance
 

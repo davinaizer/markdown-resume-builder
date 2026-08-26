@@ -136,6 +136,7 @@ def add_entry_heading(
     *,
     style_name: str = "Heading 2",
     left_indent: float = 0,
+    align_date: bool = True,
 ) -> None:
     paragraph = document.add_paragraph(style=style_name)
     paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -156,7 +157,10 @@ def add_entry_heading(
         bold=True,
         color=hex_color(theme.primary_text_color),
     )
-    paragraph.add_run("\t")
+    if align_date:
+        paragraph.add_run("\t")
+    else:
+        paragraph.add_run(" | ")
     date_run = paragraph.add_run(date.replace(" ", "\N{NO-BREAK SPACE}"))
     set_font(
         date_run,
@@ -303,9 +307,15 @@ def add_role_entry(
     theme: ResumeTheme = DEFAULT_THEME,
     *,
     left_indent: float = 0,
+    align_date: bool = True,
 ) -> None:
     add_entry_heading(
-        document, heading_left, date_right, theme, left_indent=left_indent
+        document,
+        heading_left,
+        date_right,
+        theme,
+        left_indent=left_indent,
+        align_date=align_date,
     )
 
     for idx, description in enumerate(descriptions):
