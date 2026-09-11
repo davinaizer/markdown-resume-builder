@@ -82,7 +82,7 @@ Joined the Promotions team building customer-facing promotional experiences befo
 - Mentored developers, designers and stakeholders through code reviews, frontend debugging, Git support and technical documentation.
 - Contributed to customer-facing React applications while helping improve internal engineering tooling and workflows.
 
-**Tech:** React • JavaScript • Redux • Sass • Node.js
+**Tech:** React • JavaScript • Redux • Webpack • Sass • Node.js
 
 ---
 
