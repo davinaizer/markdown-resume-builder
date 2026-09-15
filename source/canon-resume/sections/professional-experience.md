@@ -16,7 +16,7 @@ Building Alfred with a backend engineer as an independent side project intended 
 - Standardised project configuration, build tooling and repository workflows using XcodeGen and automated verification.
 - Established an AI-assisted engineering workflow combining code generation with architectural review, testing and manual verification before changes are accepted.
 
-**Tech:** Swift • SwiftUI • REST APIs • Firebase • XCTest • XcodeGen
+**Tech:** Swift • SwiftUI • REST APIs • Firebase • XCTest • XcodeGen • GitLab
 
 ---
 
