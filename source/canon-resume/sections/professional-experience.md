@@ -34,7 +34,7 @@ Worked on Signal Ocean, a maritime intelligence platform used by brokers, operat
 
 - Developed the frontend implementation of the Template Admin experience, taking the feature through implementation, testing, fixes and production release.
 - Implemented role-based template management for a multi-company SaaS platform, separating administrator management capabilities from end-user template consumption.
-- Built data-intensive configuration workflows using AG Grid, covering validation, permissions, interaction states and reusable editing behaviours.
+- Built data-intensive configuration workflows using AG Grid, including role-based editing, validation, read-only and deletion states, and reusable editing behaviours.
 - Worked closely with backend engineers on metadata-driven APIs and shared application state to support reusable template configuration across multiple dashboards.
 - Developed React and TypeScript features across the Vessel List area and shared UI component library.
 - Onboarded a frontend engineer to the monorepo, Vessel List architecture and Azure-based development environment.
